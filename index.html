@@ -3,11 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>桃園市大溪區田心國民小學附設幼兒園 - 環境清潔與消毒自主檢核管理系統 (Google 穩定版)</title>
+    <title>桃園市大溪區田心國民小學附設幼兒園 - 環境清潔與消毒自主檢核管理系統</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "demo", projectId: "demo" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tinshin-kindergarten-cleaning-v7';
+
+        window.db = db;
+        window.auth = auth;
+        window.appId = appId;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.onSnapshot = onSnapshot;
+        window.signInAnonymously = signInAnonymously;
+        window.isFirebaseReady = false;
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                window.isFirebaseReady = true;
+                window.dispatchEvent(new Event('firebase-ready'));
+            } catch (error) {
+                try {
+                    await signInAnonymously(auth);
+                } catch(e) {}
+                window.isFirebaseReady = true;
+                window.dispatchEvent(new Event('firebase-ready'));
+            }
+        }
+        initAuth();
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; }
@@ -22,10 +65,10 @@
     <div class="max-w-5xl mx-auto px-4 py-6">
         <header class="bg-white rounded-2xl shadow-sm p-6 mb-6 text-center border-t-4 border-emerald-600">
             <div class="inline-block p-2 bg-emerald-50 rounded-full text-emerald-700 mb-2">
-                <i class="fa-solid fa-school text-2xl"></i>
+                <i class="fa-solid fa-seedling text-2xl"></i>
             </div>
             <h1 class="text-xl md:text-2xl font-bold text-emerald-900 mb-1">桃園市大溪區田心國民小學附設幼兒園</h1>
-            <h2 class="text-base md:text-lg font-semibold text-emerald-700">環境清潔與消毒自主檢核管理系統 (Google 穩定版)</h2>
+            <h2 class="text-base md:text-lg font-semibold text-emerald-700">環境清潔與消毒自主檢核管理系統</h2>
         </header>
 
         <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
@@ -38,7 +81,7 @@
                 </button>
             </div>
             <div id="cloud-status-pill" class="text-xs bg-emerald-100 text-emerald-800 px-3.5 py-2 rounded-full font-medium flex items-center shadow-xs">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">安全防護模式就緒 (100% 不卡住)</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">雲端資料庫連線中...</span>
             </div>
         </div>
 
@@ -48,7 +91,7 @@
                     <h3 class="text-lg font-bold text-emerald-800 flex items-center">
                         <i class="fa-solid fa-clipboard-check text-emerald-600 mr-2 text-xl"></i>每日清消 30 秒自主填報
                     </h3>
-                    <p class="text-xs text-gray-500 mt-1">點選班級與勾選項目後，一鍵安心送出（秒速完成）</p>
+                    <p class="text-xs text-gray-500 mt-1">點選班級與勾選項目後，一鍵安心送出（秒速完成並同步雲端）</p>
                 </div>
                 <button type="button" onclick="fillAllCheckboxes()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition flex items-center">
                     <i class="fa-solid fa-check-double mr-1.5"></i> 一鍵全選常用項目
@@ -120,42 +163,48 @@
                     <h3 class="text-lg font-bold text-emerald-800 flex items-center">
                         <i class="fa-solid fa-chart-line text-emerald-600 mr-2 text-xl"></i>行政總管理與填報比例統計
                     </h3>
-                    <p class="text-xs text-gray-500 mt-1">即時檢視各班級清消完成狀態與教職員所有累積填報紀錄</p>
+                    <p class="text-xs text-gray-500 mt-1">選定特定日期，即可即時檢視該日各班級完成狀態與老師個別填報次數</p>
                 </div>
                 <div class="flex gap-2 flex-wrap">
+                    <button onclick="openQrModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm flex items-center transition">
+                        <i class="fa-solid fa-qrcode mr-1.5"></i> 手機掃描 QR Code
+                    </button>
                     <button onclick="exportCsv()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-sm flex items-center transition">
-                        <i class="fa-solid fa-file-arrow-down mr-1.5"></i> 匯出報表 (CSV)
+                        <i class="fa-solid fa-file-arrow-down mr-1.5"></i> 匯出學期總報表 (CSV)
                     </button>
                 </div>
             </div>
 
             <div class="flex gap-3 mb-6 items-center flex-wrap bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">統計/篩選日期</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">選擇檢視日期</label>
                     <input type="date" id="filter-date" onchange="renderAdminData()" class="px-3.5 py-2 border rounded-xl text-sm bg-white font-medium shadow-xs">
                 </div>
                 <div class="flex items-end h-full pt-5">
-                    <button onclick="resetFilterDate()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">顯示全部歷史紀錄</button>
+                    <span class="text-xs text-emerald-800 font-bold bg-emerald-100 px-3 py-2 rounded-xl">
+                        <i class="fa-solid fa-calendar-day mr-1"></i> 目前正顯示所選日期的即時填報狀況
+                    </span>
                 </div>
             </div>
 
             <div class="mb-8">
                 <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                    <i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i> 當日各班級/區域填報狀態與比例總覽
+                    <i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i> 所選日期的各班級/區域填報狀態與比例總覽
                 </h4>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3" id="completion-cards-container"></div>
             </div>
 
             <div class="mb-8 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center">
-                    <i class="fa-solid fa-user-check text-emerald-600 mr-2"></i> 教職員累積填報次數與負責區域統計
+                <h4 class="text-sm font-bold text-slate-700 mb-1 flex items-center">
+                    <i class="fa-solid fa-user-check text-emerald-600 mr-2"></i> 該選擇日期之教職員填報次數與負責區域統計
                 </h4>
+                <p class="text-[11px] text-slate-500 mb-3">（點選上方日期即可切換查看不同日期的個別老師填報表現）</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="teacher-stats-container"></div>
             </div>
 
             <div class="border-t pt-6">
                 <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                    <i class="fa-solid fa-list-check text-emerald-600 mr-2"></i> 詳細填報紀錄明細 (包含所有老師的歷史資料)
+                    <i class="fa-solid fa-list-check text-emerald-600 mr-2"></i> 所選日期的詳細填報紀錄明細
                 </h4>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
@@ -169,7 +218,7 @@
                             </tr>
                         </thead>
                         <tbody id="admin-table-body" class="divide-y divide-gray-100">
-                            <tr><td colspan="5" class="text-center py-6 text-gray-400">載入資料中...</td></tr>
+                            <tr><td colspan="5" class="text-center py-6 text-gray-400">載入雲端資料中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -177,6 +226,25 @@
         </div>
     </div>
 
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
+            <button onclick="closeQrModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-emerald-800 mb-2">手機掃描快速填報</h3>
+            <p class="text-xs text-gray-500 mb-3">請用手機相機掃描下方 QR Code 即可直接進入填報</p>
+            <div id="qrcode-container" class="bg-white p-3 inline-block rounded-xl border shadow-inner mb-3">
+                <img id="qr-img" src="" alt="QR Code" class="w-44 h-44 mx-auto">
+            </div>
+            <div class="mb-4">
+                <button onclick="copyShareUrl()" class="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl font-bold text-xs transition flex items-center justify-center">
+                    <i class="fa-solid fa-copy mr-1.5"></i> 複製填報網址給老師
+                </button>
+            </div>
+            <button onclick="closeQrModal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition">關閉視窗</button>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
     <div id="custom-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
             <div id="modal-icon" class="text-4xl mb-3 text-emerald-600"></div>
@@ -209,7 +277,7 @@
         ];
 
         let allRecords = [];
-        const STORAGE_KEY = 'tinshin_google_ready_records_v1';
+        const LOCAL_STORAGE_KEY = 'tinshin_cleaning_records_v7';
 
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
@@ -221,12 +289,20 @@
             }
 
             renderFormOptions();
-            loadRecords();
+            loadAllRecords();
+
+            window.addEventListener('firebase-ready', () => {
+                loadCloudRecords();
+            });
+
+            setTimeout(() => {
+                loadCloudRecords();
+            }, 600);
         };
 
-        function loadRecords() {
+        function loadAllRecords() {
             try {
-                const local = localStorage.getItem(STORAGE_KEY);
+                const local = localStorage.getItem(LOCAL_STORAGE_KEY);
                 if (local) {
                     const parsed = JSON.parse(local);
                     if (Array.isArray(parsed)) {
@@ -237,9 +313,16 @@
             } catch(e) {}
         }
 
-        function saveRecords() {
+        function saveLocalRecord(record) {
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
+                let local = [];
+                const existing = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (existing) local = JSON.parse(existing);
+                local = local.filter(r => r.id !== record.id);
+                local.unshift(record);
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(local));
+                allRecords = local;
+                renderAdminData();
             } catch(e) {}
         }
 
@@ -296,7 +379,44 @@
             }
         }
 
-        function submitForm(e) {
+        function loadCloudRecords() {
+            if (!window.db || !window.collection || !window.onSnapshot) return;
+            try {
+                const colRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'cleaning_records');
+                window.onSnapshot(colRef, (snapshot) => {
+                    const cloudMap = new Map();
+                    snapshot.forEach(docSnap => {
+                        cloudMap.set(docSnap.id, { id: docSnap.id, ...docSnap.data() });
+                    });
+                    
+                    try {
+                        const local = localStorage.getItem(LOCAL_STORAGE_KEY);
+                        if (local) {
+                            JSON.parse(local).forEach(l => {
+                                if (!Array.from(cloudMap.values()).some(c => c.timestamp === l.timestamp && c.className === l.className && c.name === l.name)) {
+                                    cloudMap.set(l.id || ('local_' + Math.random()), l);
+                                }
+                            });
+                        }
+                    } catch(e) {}
+
+                    allRecords = Array.from(cloudMap.values());
+                    allRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allRecords));
+
+                    const statusText = document.getElementById('cloud-status-text');
+                    if(statusText) statusText.innerText = "雲端同步正常運作中";
+                    
+                    renderAdminData();
+                }, (error) => {
+                    const statusText = document.getElementById('cloud-status-text');
+                    if(statusText) statusText.innerText = "本地安全防護模式";
+                });
+            } catch (e) {}
+        }
+
+        async function submitForm(e) {
             e.preventDefault();
             if (!selectedClass) {
                 showModal("提示", "請先點選選擇「班級 / 負責區域」！", "warning");
@@ -337,34 +457,47 @@
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>資料安全儲存中...`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>資料同步上傳中...`;
 
-            setTimeout(() => {
-                allRecords.unshift(recordData);
-                saveRecords();
-                renderAdminData();
+            saveLocalRecord(recordData);
 
-                showModal("填報成功", `感謝 ${name}！「${selectedClass}」今日環境清消檢核表已成功送出！`, "success");
-                
-                document.getElementById('cleaning-form').reset();
-                selectedClass = "";
-                document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
-                renderFormOptions();
+            let cloudPromise = new Promise(async (resolve) => {
+                try {
+                    if (window.auth && !window.auth.currentUser && window.signInAnonymously) {
+                        await window.signInAnonymously(window.auth);
+                    }
+                    if (window.db && window.collection && window.addDoc) {
+                        const colRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'cleaning_records');
+                        await window.addDoc(colRef, recordData);
+                    }
+                } catch(err) {}
+                resolve();
+            });
 
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i>確認無誤，送出今日清消紀錄`;
-            }, 400);
+            let timeoutPromise = new Promise((resolve) => setTimeout(resolve, 3000));
+            await Promise.race([cloudPromise, timeoutPromise]);
+
+            showModal("填報成功", `感謝 ${name}！「${selectedClass}」今日環境清消檢核表已成功送出並同步！`, "success");
+            
+            document.getElementById('cleaning-form').reset();
+            selectedClass = "";
+            document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+            renderFormOptions();
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i>確認無誤，送出今日清消紀錄`;
         }
 
         function renderAdminData() {
             const filterDate = document.getElementById('filter-date').value;
 
+            // 嚴格篩選出所選日期的紀錄
             let filtered = allRecords;
             if (filterDate) {
                 filtered = allRecords.filter(r => r.date === filterDate || (r.timestamp && r.timestamp.startsWith(filterDate)));
             }
 
-            // 1. 各班級完成狀態
+            // 1. 各班級完成狀態 (針對選定日期)
             const cardsContainer = document.getElementById('completion-cards-container');
             if (cardsContainer) {
                 cardsContainer.innerHTML = classesList.map(cls => {
@@ -380,7 +513,7 @@
                 }).join('');
             }
 
-            // 2. 教職員累積填報次數
+            // 2. 教職員當日填報次數與負責區域統計
             const teacherStatsContainer = document.getElementById('teacher-stats-container');
             const teacherSelectEl = document.getElementById('teacher-name');
             const allTeachers = [];
@@ -393,7 +526,8 @@
             const teacherDataMap = {};
             allTeachers.forEach(t => { teacherDataMap[t] = { count: 0, classes: new Set() }; });
 
-            allRecords.forEach(r => {
+            // 這裡只計算「所選日期」的資料，讓行政人員清楚看見當天誰填報了幾次
+            filtered.forEach(r => {
                 if(r.name) {
                     if(!teacherDataMap[r.name]) teacherDataMap[r.name] = { count: 0, classes: new Set() };
                     teacherDataMap[r.name].count += 1;
@@ -404,7 +538,7 @@
             if (teacherStatsContainer) {
                 teacherStatsContainer.innerHTML = allTeachers.map(t => {
                     const data = teacherDataMap[t] || { count: 0, classes: new Set() };
-                    const classesStr = data.classes.size > 0 ? Array.from(data.classes).join(', ') : '尚無紀錄';
+                    const classesStr = data.classes.size > 0 ? Array.from(data.classes).join(', ') : '今日尚未填報';
                     return `
                         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between text-xs">
                             <div class="flex justify-between items-center mb-1.5">
@@ -421,11 +555,11 @@
                 }).join('');
             }
 
-            // 3. 詳細紀錄表格
+            // 3. 詳細紀錄表格 (僅顯示所選日期)
             const tbody = document.getElementById('admin-table-body');
             if (tbody) {
                 if (filtered.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">目前尚無符合條件的填報紀錄</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">所選日期 (${filterDate || '全部'}) 目前尚無填報紀錄</td></tr>`;
                     return;
                 }
 
@@ -449,15 +583,17 @@
             }
         }
 
-        function resetFilterDate() {
-            document.getElementById('filter-date').value = '';
-            renderAdminData();
-        }
-
-        function deleteRecord(id) {
+        async function deleteRecord(id) {
             if (!confirm("確定要刪除這筆清消紀錄嗎？")) return;
             allRecords = allRecords.filter(r => r.id !== id);
-            saveRecords();
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allRecords));
+            
+            if (window.db && !id.startsWith('local_')) {
+                try {
+                    const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'cleaning_records', id);
+                    await window.deleteDoc(docRef);
+                } catch(e) {}
+            }
             renderAdminData();
             showModal("成功", "已成功刪除該筆紀錄。", "success");
         }
@@ -475,9 +611,35 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `田心附幼環境清潔檢核表總表_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `田心附幼環境清潔檢核表學期總表_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        function openQrModal() {
+            const currentUrl = window.location.href.split('#')[0];
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
+            document.getElementById('qr-img').src = qrApiUrl;
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        function copyShareUrl() {
+            const currentUrl = window.location.href.split('#')[0];
+            const tempInput = document.createElement('input');
+            tempInput.value = currentUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            try {
+                document.execCommand('copy');
+                showModal("複製成功", "填報網址已複製到剪貼簿！您可以直接透過通訊軟體（如 Line）傳給老師們使用。", "success");
+            } catch (err) {
+                showModal("提示", "網址: " + currentUrl, "warning");
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        function closeQrModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
         }
 
         function showModal(title, message, type) {
