@@ -18,7 +18,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tinshin-kindergarten-cleaning-v7';
+        
+        // 統一固定全校共用 appId，確保手機與電腦連線至同一個共用雲端空間
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tinshin-kindergarten-cleaning-shared-v2026';
 
         window.db = db;
         window.auth = auth;
@@ -81,7 +83,7 @@
                 </button>
             </div>
             <div id="cloud-status-pill" class="text-xs bg-emerald-100 text-emerald-800 px-3.5 py-2 rounded-full font-medium flex items-center shadow-xs">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">雲端資料庫連線中...</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">雲端雙向同步連線中...</span>
             </div>
         </div>
 
@@ -91,10 +93,10 @@
                     <h3 class="text-lg font-bold text-emerald-800 flex items-center">
                         <i class="fa-solid fa-clipboard-check text-emerald-600 mr-2 text-xl"></i>每日清消 30 秒自主填報
                     </h3>
-                    <p class="text-xs text-gray-500 mt-1">點選班級與勾選項目後，一鍵安心送出（秒速完成並同步雲端）</p>
+                    <p class="text-xs text-gray-500 mt-1">點選班級與勾選項目後，一鍵安心送出（手機與電腦即時互通）</p>
                 </div>
-                <button type="button" onclick="fillAllCheckboxes()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition flex items-center">
-                    <i class="fa-solid fa-check-double mr-1.5"></i> 一鍵全選常用項目
+                <button type="button" onclick="toggleAllCheckboxes()" id="toggle-all-btn" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition flex items-center">
+                    <i class="fa-solid fa-check-double mr-1.5" id="toggle-icon"></i> <span id="toggle-text">一鍵全選常用項目</span>
                 </button>
             </div>
 
@@ -161,9 +163,9 @@
             <div class="flex justify-between items-center mb-6 flex-wrap gap-4 border-b pb-4">
                 <div>
                     <h3 class="text-lg font-bold text-emerald-800 flex items-center">
-                        <i class="fa-solid fa-chart-line text-emerald-600 mr-2 text-xl"></i>行政總管理與填報比例統計
+                        <i class="fa-solid fa-chart-line text-emerald-600 mr-2 text-xl"></i>行政總管理與當日精準統計
                     </h3>
-                    <p class="text-xs text-gray-500 mt-1">選定特定日期，即可即時檢視該日各班級完成狀態與老師個別填報次數</p>
+                    <p class="text-xs text-gray-500 mt-1">點選特定日期，即時檢視該日手機與電腦同步上傳的所有填報明細與個人次數</p>
                 </div>
                 <div class="flex gap-2 flex-wrap">
                     <button onclick="openQrModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm flex items-center transition">
@@ -182,7 +184,7 @@
                 </div>
                 <div class="flex items-end h-full pt-5">
                     <span class="text-xs text-emerald-800 font-bold bg-emerald-100 px-3 py-2 rounded-xl">
-                        <i class="fa-solid fa-calendar-day mr-1"></i> 目前正顯示所選日期的即時填報狀況
+                        <i class="fa-solid fa-calendar-day mr-1"></i> 資料將精準呈現您所選定該日期的手機與電腦同步填報內容
                     </span>
                 </div>
             </div>
@@ -196,15 +198,15 @@
 
             <div class="mb-8 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <h4 class="text-sm font-bold text-slate-700 mb-1 flex items-center">
-                    <i class="fa-solid fa-user-check text-emerald-600 mr-2"></i> 該選擇日期之教職員填報次數與負責區域統計
+                    <i class="fa-solid fa-user-check text-emerald-600 mr-2"></i> 所選日期之教職員填報次數與負責區域統計
                 </h4>
-                <p class="text-[11px] text-slate-500 mb-3">（點選上方日期即可切換查看不同日期的個別老師填報表現）</p>
+                <p class="text-[11px] text-slate-500 mb-3">（隨您切換上方日期，精準顯示該日個別老師的填報表現）</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="teacher-stats-container"></div>
             </div>
 
             <div class="border-t pt-6">
                 <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                    <i class="fa-solid fa-list-check text-emerald-600 mr-2"></i> 所選日期的詳細填報紀錄明細
+                    <i class="fa-solid fa-list-check text-emerald-600 mr-2"></i> 所選日期的詳細填報紀錄明細 (包含手機與電腦所有同步資料)
                 </h4>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
@@ -218,7 +220,7 @@
                             </tr>
                         </thead>
                         <tbody id="admin-table-body" class="divide-y divide-gray-100">
-                            <tr><td colspan="5" class="text-center py-6 text-gray-400">載入雲端資料中...</td></tr>
+                            <tr><td colspan="5" class="text-center py-6 text-gray-400">載入雲端即時資料中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -226,14 +228,14 @@
         </div>
     </div>
 
-    <!-- QR Code Modal -->
     <div id="qr-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
             <button onclick="closeQrModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-lg"><i class="fa-solid fa-xmark"></i></button>
             <h3 class="text-lg font-bold text-emerald-800 mb-2">手機掃描快速填報</h3>
-            <p class="text-xs text-gray-500 mb-3">請用手機相機掃描下方 QR Code 即可直接進入填報</p>
+            <p class="text-xs text-gray-500 mb-2">請用手機相機掃描下方高對比 QR Code 即可直接進入填報</p>
+            <p id="qr-url-display" class="text-[11px] text-emerald-600 font-mono bg-emerald-50 p-1.5 rounded mb-3 break-all"></p>
             <div id="qrcode-container" class="bg-white p-3 inline-block rounded-xl border shadow-inner mb-3">
-                <img id="qr-img" src="" alt="QR Code" class="w-44 h-44 mx-auto">
+                <img id="qr-img" src="" alt="QR Code" class="w-48 h-48 mx-auto object-contain">
             </div>
             <div class="mb-4">
                 <button onclick="copyShareUrl()" class="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl font-bold text-xs transition flex items-center justify-center">
@@ -244,7 +246,6 @@
         </div>
     </div>
 
-    <!-- Alert Modal -->
     <div id="custom-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
             <div id="modal-icon" class="text-4xl mb-3 text-emerald-600"></div>
@@ -277,7 +278,8 @@
         ];
 
         let allRecords = [];
-        const LOCAL_STORAGE_KEY = 'tinshin_cleaning_records_v7';
+        let isAllChecked = false;
+        const LOCAL_STORAGE_KEY = 'tinshin_cleaning_shared_v2026';
 
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
@@ -349,14 +351,30 @@
             `).join('');
         }
 
-        function fillAllCheckboxes() {
-            document.querySelectorAll('input[name="indoor"]').forEach(cb => cb.checked = true);
-            document.querySelectorAll('input[name="public"]').forEach(cb => cb.checked = true);
+        function toggleAllCheckboxes() {
+            isAllChecked = !isAllChecked;
+            const checkboxes = document.querySelectorAll('input[name="indoor"], input[name="public"]');
+            checkboxes.forEach(cb => cb.checked = isAllChecked);
+
+            const toggleText = document.getElementById('toggle-text');
+            const toggleIcon = document.getElementById('toggle-icon');
+            const toggleBtn = document.getElementById('toggle-all-btn');
+
+            if (isAllChecked) {
+                toggleText.innerText = "取消全選";
+                toggleIcon.className = "fa-solid fa-xmark mr-1.5";
+                toggleBtn.className = "px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl font-bold text-xs transition flex items-center";
+            } else {
+                toggleText.innerText = "一鍵全選常用項目";
+                toggleIcon.className = "fa-solid fa-check-double mr-1.5";
+                toggleBtn.className = "px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition flex items-center";
+            }
         }
 
         function selectClass(cls) {
             selectedClass = cls;
             renderFormOptions();
+            isAllChecked = false;
         }
 
         function switchTab(tab) {
@@ -382,7 +400,7 @@
         function loadCloudRecords() {
             if (!window.db || !window.collection || !window.onSnapshot) return;
             try {
-                const colRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'cleaning_records');
+                const colRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_cleaning_records');
                 window.onSnapshot(colRef, (snapshot) => {
                     const cloudMap = new Map();
                     snapshot.forEach(docSnap => {
@@ -406,7 +424,7 @@
                     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allRecords));
 
                     const statusText = document.getElementById('cloud-status-text');
-                    if(statusText) statusText.innerText = "雲端同步正常運作中";
+                    if(statusText) statusText.innerText = "雲端雙向同步正常運作中";
                     
                     renderAdminData();
                 }, (error) => {
@@ -457,7 +475,7 @@
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>資料同步上傳中...`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>雲端同步上傳中...`;
 
             saveLocalRecord(recordData);
 
@@ -467,7 +485,7 @@
                         await window.signInAnonymously(window.auth);
                     }
                     if (window.db && window.collection && window.addDoc) {
-                        const colRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'cleaning_records');
+                        const colRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_cleaning_records');
                         await window.addDoc(colRef, recordData);
                     }
                 } catch(err) {}
@@ -481,6 +499,7 @@
             
             document.getElementById('cleaning-form').reset();
             selectedClass = "";
+            isAllChecked = false;
             document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
             renderFormOptions();
 
@@ -491,13 +510,14 @@
         function renderAdminData() {
             const filterDate = document.getElementById('filter-date').value;
 
-            // 嚴格篩選出所選日期的紀錄
             let filtered = allRecords;
             if (filterDate) {
-                filtered = allRecords.filter(r => r.date === filterDate || (r.timestamp && r.timestamp.startsWith(filterDate)));
+                filtered = allRecords.filter(r => {
+                    const rDate = r.date || (r.timestamp ? r.timestamp.split(' ')[0] : '');
+                    return rDate === filterDate;
+                });
             }
 
-            // 1. 各班級完成狀態 (針對選定日期)
             const cardsContainer = document.getElementById('completion-cards-container');
             if (cardsContainer) {
                 cardsContainer.innerHTML = classesList.map(cls => {
@@ -513,7 +533,6 @@
                 }).join('');
             }
 
-            // 2. 教職員當日填報次數與負責區域統計
             const teacherStatsContainer = document.getElementById('teacher-stats-container');
             const teacherSelectEl = document.getElementById('teacher-name');
             const allTeachers = [];
@@ -526,7 +545,6 @@
             const teacherDataMap = {};
             allTeachers.forEach(t => { teacherDataMap[t] = { count: 0, classes: new Set() }; });
 
-            // 這裡只計算「所選日期」的資料，讓行政人員清楚看見當天誰填報了幾次
             filtered.forEach(r => {
                 if(r.name) {
                     if(!teacherDataMap[r.name]) teacherDataMap[r.name] = { count: 0, classes: new Set() };
@@ -538,7 +556,7 @@
             if (teacherStatsContainer) {
                 teacherStatsContainer.innerHTML = allTeachers.map(t => {
                     const data = teacherDataMap[t] || { count: 0, classes: new Set() };
-                    const classesStr = data.classes.size > 0 ? Array.from(data.classes).join(', ') : '今日尚未填報';
+                    const classesStr = data.classes.size > 0 ? Array.from(data.classes).join(', ') : '當日尚無紀錄';
                     return `
                         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between text-xs">
                             <div class="flex justify-between items-center mb-1.5">
@@ -555,7 +573,6 @@
                 }).join('');
             }
 
-            // 3. 詳細紀錄表格 (僅顯示所選日期)
             const tbody = document.getElementById('admin-table-body');
             if (tbody) {
                 if (filtered.length === 0) {
@@ -590,7 +607,7 @@
             
             if (window.db && !id.startsWith('local_')) {
                 try {
-                    const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'cleaning_records', id);
+                    const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_cleaning_records', id);
                     await window.deleteDoc(docRef);
                 } catch(e) {}
             }
@@ -617,23 +634,32 @@
         }
 
         function openQrModal() {
-            const currentUrl = window.location.href.split('#')[0];
-            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
+            let shareUrl = window.location.href.split('#')[0];
+            if (shareUrl.includes('file://') || shareUrl.includes('localhost') || shareUrl.includes('127.0.0.1')) {
+                shareUrl = 'https://head-thes.github.io/kids-cleaning/';
+            }
+            
+            document.getElementById('qr-url-display').innerText = shareUrl;
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareUrl)}&format=png&margin=10`;
             document.getElementById('qr-img').src = qrApiUrl;
             document.getElementById('qr-modal').classList.remove('hidden');
         }
 
         function copyShareUrl() {
-            const currentUrl = window.location.href.split('#')[0];
+            let shareUrl = window.location.href.split('#')[0];
+            if (shareUrl.includes('file://') || shareUrl.includes('localhost') || shareUrl.includes('127.0.0.1')) {
+                shareUrl = 'https://head-thes.github.io/kids-cleaning/';
+            }
+
             const tempInput = document.createElement('input');
-            tempInput.value = currentUrl;
+            tempInput.value = shareUrl;
             document.body.appendChild(tempInput);
             tempInput.select();
             try {
                 document.execCommand('copy');
                 showModal("複製成功", "填報網址已複製到剪貼簿！您可以直接透過通訊軟體（如 Line）傳給老師們使用。", "success");
             } catch (err) {
-                showModal("提示", "網址: " + currentUrl, "warning");
+                showModal("提示", "網址: " + shareUrl, "warning");
             }
             document.body.removeChild(tempInput);
         }
