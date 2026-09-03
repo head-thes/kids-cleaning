@@ -234,7 +234,7 @@
 
         let allRecords = [];
         let isAllChecked = false;
-        const STORAGE_KEY = 'tinshin_cleaning_master_v2026_sync_v3';
+        const STORAGE_KEY = 'tinshin_cleaning_master_v2026_sync_v4';
         const CLOUD_SYNC_URL = 'https://api.jsonbin.io/v3/b/6618e474acd3cb34a8364805';
 
         window.onload = function() {
@@ -255,7 +255,7 @@
 
         async function loadRecordsFromCloud() {
             try {
-                // 1. 優先載入本機快取
+                // 1. 優先載入本機快取，確保畫面秒開不空白
                 const local = localStorage.getItem(STORAGE_KEY);
                 if (local) {
                     const parsed = JSON.parse(local);
