@@ -269,18 +269,38 @@
             </div>
           </div>
 
+          <!-- 區塊三：【廚房】消毒，完成的地方，請選擇（獨立區塊） -->
+          <div class="space-y-3 pt-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
+              <h3 class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
+                <i data-lucide="utensils" class="w-4 h-4 text-emerald-700"></i>
+                【廚房】消毒，完成的地方，請選擇（可多選）：
+              </h3>
+              <!-- 廚房一鍵全選按鈕 -->
+              <button type="button" id="toggle-kitchen-btn" onclick="toggleCategoryItems('kitchen')" class="text-xs px-3 py-1.5 rounded-lg bg-teal-50 border border-teal-300 text-teal-700 hover:bg-teal-100 transition font-medium flex items-center gap-1">
+                <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+                <span id="toggle-kitchen-text">廚房 一鍵全選 (3項)</span>
+              </button>
+            </div>
+
+            <!-- 廚房 3 項清單 -->
+            <div id="kitchen-items-container" class="grid grid-cols-1 gap-3">
+              <!-- JS 動態生成 -->
+            </div>
+          </div>
+
           <!-- 全域進度總覽與總全選 -->
           <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
             <div class="flex items-center gap-2">
               <span class="text-xs sm:text-sm font-semibold text-slate-700">全案檢核進度：</span>
               <span id="checked-progress-badge" class="text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-700 font-bold">
-                已選 0 / 12 項
+                已選 0 / 15 項
               </span>
             </div>
             <!-- 全部一鍵全選 / 全部取消 -->
             <button type="button" onclick="toggleAllItemsGlobal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-teal-600 text-white hover:bg-teal-700 shadow-xs transition flex items-center gap-1.5">
               <i data-lucide="list-checks" class="w-4 h-4"></i>
-              <span id="toggle-all-global-text">全區一鍵全選 (12項)</span>
+              <span id="toggle-all-global-text">全區一鍵全選 (15項)</span>
             </button>
           </div>
 
@@ -582,7 +602,7 @@
     ];
 
     /*
-     * 2. 檢核細項定義 (依據圖二分為兩大區塊)
+     * 2. 檢核細項定義
      */
     // 【教室內】清潔消毒 (共 9 項)
     const CLASSROOM_ITEMS = [
@@ -592,7 +612,7 @@
       { id: 'c4', num: '4', title: '廁所與洗手台：已刷洗便器、檯面，且地板保持乾燥防滑。' },
       { id: 'c5', num: '5', title: '高頻率接觸點：門把、喇叭鎖、電燈開關、電扇旋鈕。' },
       { id: 'c6', num: '6', title: '個人置物空間：幼生置物櫃、書包櫃表面擦拭。' },
-      { id: 'c7', num: '7', title: '垃圾與廚餘：已清空並清洗垃圾桶，垃圾桶已加蓋。' },
+      { id: 'c7', num: '7', title: '垃圾與廚餘：垃圾桶已清空，保持垃圾桶的乾淨、清潔。' },
       { id: 'c8', num: '8', title: '飲水機周邊：機身與出水口擦拭，托盤積水已倒掉。' },
       { id: 'c9', num: '9', title: '電器遙控器：冷氣遙控器、電扇旋鈕。' }
     ];
@@ -601,13 +621,21 @@
     const PUBLIC_ITEMS = [
       { id: 'p1', num: '1', title: '戶外遊樂設施：溜滑梯扶手、攀爬架、遊具握把（已完成噴灑/擦拭）。' },
       { id: 'p2', num: '2', title: '公共動線接觸面：全校樓梯扶手（已完成擦拭）。' },
-      { id: 'p3', num: '3', title: '廚房與配膳區：配膳檯面、推車把手、冰箱門把、洗碗槽濾網（已完成清潔）。' }
+      { id: 'p3', num: '3', title: '配膳區：配膳檯面、洗手檯水槽及檯面（已完成清潔）。' }
     ];
 
-    // 合併全部清單共 12 項
+    // 【廚房】消毒 (獨立 3 項)
+    const KITCHEN_ITEMS = [
+      { id: 'k1', num: '1', title: '配膳檯面、推車把手、冰箱門把、（已完成消毒、清潔）。' },
+      { id: 'k2', num: '2', title: '洗碗槽濾網，已完成清潔。' },
+      { id: 'k3', num: '3', title: '垃圾與廚餘：垃圾桶已清空，保持垃圾桶的乾淨、清潔。' }
+    ];
+
+    // 合併全部清單共 15 項
     const ALL_CHECK_ITEMS = [
       ...CLASSROOM_ITEMS.map(i => ({ ...i, group: 'classroom' })),
-      ...PUBLIC_ITEMS.map(i => ({ ...i, group: 'public' }))
+      ...PUBLIC_ITEMS.map(i => ({ ...i, group: 'public' })),
+      ...KITCHEN_ITEMS.map(i => ({ ...i, group: 'kitchen' }))
     ];
 
     // 跨裝置同步通道鍵值 (以田心附幼專屬識別碼建立)
@@ -785,7 +813,7 @@
           classroom: '廚房',
           recorder: '陳芯穎阿姨',
           agent: '依標準規範 (高溫熱水/75%酒精)',
-          items: ALL_CHECK_ITEMS.map(i => i.id),
+          items: KITCHEN_ITEMS.map(i => i.id),
           notes: '配膳檯面、推車把手與洗碗槽濾網已高溫清潔消毒。',
           source: '電腦端填報',
           timestamp: '16:15'
@@ -794,7 +822,7 @@
       saveLocalRecords();
     }
 
-    // 渲染兩大區域的檢核細項
+    // 渲染三大區域的檢核細項 (教室內、公共區域、廚房)
     function renderChecklistCards() {
       // 1. 教室內
       const classroomBox = document.getElementById('classroom-items-container');
@@ -825,25 +853,37 @@
         `;
         publicBox.appendChild(card);
       });
-    }
 
-    // 班級按鈕式單選切換
-    function selectClassArea(areaName) {
-      document.getElementById('form-class').value = areaName;
-      const buttons = document.querySelectorAll('.class-btn');
-      buttons.forEach(btn => {
-        const isSelected = btn.getAttribute('data-area') === areaName;
-        if (isSelected) {
-          btn.className = "class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-emerald-600 border-emerald-600 text-white ring-2 ring-emerald-300";
-        } else {
-          btn.className = "class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/40";
-        }
+      // 3. 廚房 (獨立)
+      const kitchenBox = document.getElementById('kitchen-items-container');
+      kitchenBox.innerHTML = '';
+      KITCHEN_ITEMS.forEach(item => {
+        const card = document.createElement('label');
+        card.className = "flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-400 hover:bg-emerald-50/20 transition cursor-pointer select-none group";
+        card.innerHTML = `
+          <input type="checkbox" name="chk_kitchen" value="${item.id}" onchange="updateAllBadges()" class="mt-1 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 transition">
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed group-hover:text-emerald-950">
+            <span class="font-bold text-emerald-700 mr-1">${item.num}.</span>${item.title}
+          </div>
+        `;
+        kitchenBox.appendChild(card);
       });
     }
 
-    // 分類一鍵全選／取消功能 (教室內 or 公共區)
+    // 班級按鈕式單選切換
+    // 分類一鍵全選／取消功能 (教室內 or 公共區 or 廚房)
     function toggleCategoryItems(category) {
-      const selector = category === 'classroom' ? 'input[name="chk_classroom"]' : 'input[name="chk_public"]';
+      let selector = 'input[name="chk_classroom"]';
+      let title = '【教室內 9 項】';
+
+      if (category === 'public') {
+        selector = 'input[name="chk_public"]';
+        title = '【公共區域 3 項】';
+      } else if (category === 'kitchen') {
+        selector = 'input[name="chk_kitchen"]';
+        title = '【廚房 3 項】';
+      }
+
       const checkboxes = document.querySelectorAll(selector);
       if (!checkboxes.length) return;
 
@@ -851,11 +891,10 @@
       checkboxes.forEach(cb => { cb.checked = !allChecked; });
 
       updateAllBadges();
-      const title = category === 'classroom' ? '【教室內 9 項】' : '【公共區域 3 項】';
       showToast(!allChecked ? `已全選 ${title}` : `已取消 ${title}`, 'info');
     }
 
-    // 全區一鍵全選／取消功能 (全部 12 項)
+    // 全區一鍵全選／取消功能 (全部 15 項)
     function toggleAllItemsGlobal() {
       const allCheckboxes = document.querySelectorAll('#tab-teacher input[type="checkbox"]');
       if (!allCheckboxes.length) return;
@@ -864,7 +903,7 @@
       allCheckboxes.forEach(cb => { cb.checked = !allChecked; });
 
       updateAllBadges();
-      showToast(!allChecked ? '已一鍵全選全區 12 項檢核！' : '已清除全數勾選項！', 'info');
+      showToast(!allChecked ? '已一鍵全選全區 15 項檢核！' : '已清除全數勾選項！', 'info');
     }
 
     // 更新各個全選按鈕之徽章與文字狀態
@@ -889,16 +928,26 @@
         pBtnText.textContent = `公共區 一鍵全選 (${pBoxes.length}項)`;
       }
 
+      // 廚房
+      const kBoxes = document.querySelectorAll('input[name="chk_kitchen"]');
+      const kChecked = Array.from(kBoxes).filter(k => k.checked).length;
+      const kBtnText = document.getElementById('toggle-kitchen-text');
+      if (kChecked === kBoxes.length && kBoxes.length > 0) {
+        kBtnText.textContent = "取消全選 (已全選)";
+      } else {
+        kBtnText.textContent = `廚房 一鍵全選 (${kBoxes.length}項)`;
+      }
+
       // 總進度
-      const totalChecked = cChecked + pChecked;
-      const totalItems = cBoxes.length + pBoxes.length;
+      const totalChecked = cChecked + pChecked + kChecked;
+      const totalItems = cBoxes.length + pBoxes.length + kBoxes.length;
       const badge = document.getElementById('checked-progress-badge');
       const globalBtnText = document.getElementById('toggle-all-global-text');
 
       badge.textContent = `已選 ${totalChecked} / ${totalItems} 項`;
       if (totalChecked === totalItems && totalItems > 0) {
         badge.className = "text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold";
-        globalBtnText.textContent = "取消全選 (12項)";
+        globalBtnText.textContent = `取消全選 (${totalItems}項)`;
       } else {
         badge.className = "text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-700 font-bold";
         globalBtnText.textContent = `全區一鍵全選 (${totalItems}項)`;
@@ -1112,6 +1161,17 @@
 
             <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded mt-2">【公共區域與設施】</div>
             ${PUBLIC_ITEMS.map(item => {
+              const isChecked = r.items.includes(item.id);
+              return `
+                <div class="flex items-center justify-between text-xs p-2 rounded-lg border ${isChecked ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950 font-medium' : 'bg-slate-50 border-slate-200 text-slate-400 line-through'}">
+                  <span>${item.num}. ${item.title}</span>
+                  <span class="font-bold shrink-0 ml-2">${isChecked ? '✓ 已施作' : '✕ 未施作'}</span>
+                </div>
+              `;
+            }).join('')}
+
+            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded mt-2">【廚房】消毒</div>
+            ${KITCHEN_ITEMS.map(item => {
               const isChecked = r.items.includes(item.id);
               return `
                 <div class="flex items-center justify-between text-xs p-2 rounded-lg border ${isChecked ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950 font-medium' : 'bg-slate-50 border-slate-200 text-slate-400 line-through'}">
