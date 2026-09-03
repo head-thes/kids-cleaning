@@ -172,7 +172,7 @@
             </div>
           </div>
 
-          <!-- 使用之消毒藥劑與濃度：改為標準補充說明呈現（非下拉選項） -->
+          <!-- 使用之消毒藥劑與濃度：標準補充說明呈現 -->
           <div class="bg-teal-50/80 border border-teal-200/80 rounded-2xl p-4 text-xs text-teal-950 space-y-2">
             <div class="font-bold flex items-center gap-1.5 text-teal-800 text-sm">
               <i data-lucide="flask-conical" class="w-4 h-4 text-teal-600"></i>
@@ -198,7 +198,7 @@
             </div>
           </div>
 
-          <!-- 選擇班級 / 負責區域（比照圖二按鈕式單選） -->
+          <!-- 選擇班級 / 負責區域（按鈕式單選） -->
           <div class="space-y-2">
             <label class="block text-sm font-bold text-emerald-800 flex items-center gap-1.5">
               <i data-lucide="layout-grid" class="w-4 h-4 text-emerald-700"></i>
@@ -590,7 +590,7 @@
   <!-- ============================================== -->
   <script>
     /*
-     * 1. 班級/負責區域清單 (圖二)
+     * 1. 班級/負責區域清單
      */
     const ALL_AREAS = [
       "星星班",
@@ -638,7 +638,7 @@
       ...KITCHEN_ITEMS.map(i => ({ ...i, group: 'kitchen' }))
     ];
 
-    // 跨裝置同步通道鍵值 (以田心附幼專屬識別碼建立)
+    // 跨裝置同步通道鍵值
     const STORAGE_KEY = 'TX_KINDERGARTEN_CLEAN_RECORDS_V3';
     const CLOUD_TOPIC = 'tianxin_daxi_preschool_clean_sync_v3';
     const CLOUD_BASE_URL = `https://ntfy.sh/${CLOUD_TOPIC}`;
@@ -649,7 +649,6 @@
 
     /*
      * 3. 雲端與跨裝置雙向連動機制 (手機 ⇋ 電腦)
-     * 結合 LocalStorage + 雲端歷史拉取 (Poll) + 實時事件推播 (SSE) + 跨分頁廣播 (BroadcastChannel)
      */
     function loadLocalRecords() {
       try {
@@ -672,12 +671,12 @@
       }
     }
 
-    // 發布填報紀錄至雲端（手機或電腦送出時自動觸發）
+    // 發布填報紀錄至雲端
     async function broadcastToCloud(newRecord) {
       // 1. 同裝置多分頁即時廣播
       BC_CHANNEL.postMessage({ type: 'NEW_RECORD', data: newRecord });
 
-      // 2. 跨裝置雲端廣播（送至公開中繼主題）
+      // 2. 跨裝置雲端廣播
       try {
         await fetch(CLOUD_BASE_URL, {
           method: 'POST',
@@ -693,7 +692,7 @@
       }
     }
 
-    // 從雲端拉取歷史填報紀錄（保證電腦開機後能取得手機之前填報的所有資料）
+    // 從雲端拉取歷史填報紀錄
     async function fetchCloudHistory() {
       try {
         const res = await fetch(`${CLOUD_BASE_URL}/json?poll=1`);
@@ -717,7 +716,6 @@
         });
 
         if (hasNew) {
-          // 依日期與時間降序排列
           records.sort((a, b) => (b.date + ' ' + (b.timestamp || '')).localeCompare(a.date + ' ' + (a.timestamp || '')));
           saveLocalRecords();
           updateAdminDashboard();
@@ -727,7 +725,7 @@
       }
     }
 
-    // 建立實時推播監聽 (SSE: Server-Sent Events)
+    // 建立實時推播監聽 (SSE)
     let sseSource = null;
     function startCloudListener() {
       try {
@@ -871,6 +869,18 @@
     }
 
     // 班級按鈕式單選切換
+    function selectClassArea(areaName) {
+      document.getElementById('form-class').value = areaName;
+      const buttons = document.querySelectorAll('.class-btn');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('data-area') === areaName) {
+          btn.className = "class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-emerald-600 border-emerald-600 text-white ring-2 ring-emerald-300";
+        } else {
+          btn.className = "class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/40";
+        }
+      });
+    }
+
     // 分類一鍵全選／取消功能 (教室內 or 公共區 or 廚房)
     function toggleCategoryItems(category) {
       let selector = 'input[name="chk_classroom"]';
@@ -1217,7 +1227,7 @@
       const todayStr = new Date().toISOString().split('T')[0];
       const filename = `田心附幼環境清潔消毒檢核表_${todayStr}.xls`;
 
-      // 構建相容 Excel 的 XML/HTML 表格字串，內建 UTF-8 宣告與幼兒園專用表頭
+      // 構建相容 Excel 的 XML/HTML 表格字串
       let excelContent = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
         <head>
@@ -1327,12 +1337,10 @@
     }
 
     function printQRCodeCard() {
-      // 加入只列印門牌之標籤，隱藏其他所有操作介面
       document.body.classList.add('printing-qr-only');
       window.print();
     }
 
-    // 列印對話框關閉後自動復原常態畫面
     window.addEventListener('afterprint', () => {
       document.body.classList.remove('printing-qr-only');
     });
@@ -1388,7 +1396,7 @@
       lucide.createIcons();
     }
 
-    // 解析 URL 參數 (如手機掃碼帶入班級)
+    // 解析 URL 參數
     function checkURLParameters() {
       const params = new URLSearchParams(window.location.search);
       const classParam = params.get('class');
@@ -1455,8 +1463,8 @@
       updateAdminDashboard();
       generateHighContrastQR();
       startCloudListener();
-      fetchCloudHistory(); // 啟動時立即同步雲端所有新舊紀錄
-      setInterval(fetchCloudHistory, 20000); // 每 20 秒自動於後台巡迴同步一次
+      fetchCloudHistory();
+      setInterval(fetchCloudHistory, 20000);
       lucide.createIcons();
     };
   </script>
