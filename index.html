@@ -236,11 +236,11 @@
               </h3>
               <button type="button" id="toggle-classroom-btn" onclick="toggleCategoryItems('classroom')" class="text-xs px-3 py-1.5 rounded-lg bg-teal-50 border border-teal-300 text-teal-700 hover:bg-teal-100 transition font-medium flex items-center gap-1">
                 <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
-                <span id="toggle-classroom-text">教室內 一鍵全選 (9項)</span>
+                <span id="toggle-classroom-text">教室內 一鍵全選 (10項)</span>
               </button>
             </div>
 
-            <!-- 教室內 9 項清單 -->
+            <!-- 教室內 10 項清單 -->
             <div id="classroom-items-container" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
           </div>
 
@@ -253,11 +253,11 @@
               </h3>
               <button type="button" id="toggle-public-btn" onclick="toggleCategoryItems('public')" class="text-xs px-3 py-1.5 rounded-lg bg-teal-50 border border-teal-300 text-teal-700 hover:bg-teal-100 transition font-medium flex items-center gap-1">
                 <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
-                <span id="toggle-public-text">公共區 一鍵全選 (3項)</span>
+                <span id="toggle-public-text">公共區 一鍵全選 (2項)</span>
               </button>
             </div>
 
-            <!-- 公共區域 3 項清單 -->
+            <!-- 公共區域 2 項清單 -->
             <div id="public-items-container" class="grid grid-cols-1 gap-3"></div>
           </div>
 
@@ -585,7 +585,7 @@
     /*
      * 2. 檢核細項定義（含您指定更新之精準文字）
      */
-    // 【教室內】清潔消毒 (共 9 項)
+    // 【教室內】清潔消毒 (共 10 項)
     const CLASSROOM_ITEMS = [
       { id: 'c1', num: '1', title: '幼生桌面與椅子：已使用 500ppm 稀釋漂白水或酒精擦拭。' },
       { id: 'c2', num: '2', title: '教具與玩具：已完成表面消毒（含積木、拼圖、操作教具）。' },
@@ -595,14 +595,14 @@
       { id: 'c6', num: '6', title: '個人置物空間：幼生置物櫃、書包櫃表面擦拭。' },
       { id: 'c7', num: '7', title: '垃圾與廚餘：垃圾桶已清空，保持垃圾桶的乾淨、清潔。' },
       { id: 'c8', num: '8', title: '飲水機周邊：機身與出水口擦拭，托盤積水已倒掉。' },
-      { id: 'c9', num: '9', title: '電器遙控器：冷氣遙控器、電扇旋鈕。' }
+      { id: 'c9', num: '9', title: '電器遙控器：冷氣遙控器、電扇旋鈕。' },
+      { id: 'c10', num: '10', title: '配膳區：配膳檯面、洗手檯水槽及檯面（已完成清潔）。' }
     ];
 
-    // 【公共區域與設施】消毒 (共 3 項)
+    // 【公共區域與設施】消毒 (共 2 項)
     const PUBLIC_ITEMS = [
       { id: 'p1', num: '1', title: '戶外遊樂設施：溜滑梯扶手、攀爬架、遊具握把（已完成噴灑/擦拭）。' },
-      { id: 'p2', num: '2', title: '公共動線接觸面：全校樓梯扶手（已完成擦拭）。' },
-      { id: 'p3', num: '3', title: '配膳區：配膳檯面、洗手檯水槽及檯面（已完成清潔）。' }
+      { id: 'p2', num: '2', title: '公共動線接觸面：全校樓梯扶手（已完成擦拭）。' }
     ];
 
     // 【廚房】消毒 (獨立 3 項)
@@ -852,11 +852,11 @@
 
     function toggleCategoryItems(category) {
       let selector = 'input[name="chk_classroom"]';
-      let title = '【教室內 9 項】';
+      let title = '【教室內 10 項】';
 
       if (category === 'public') {
         selector = 'input[name="chk_public"]';
-        title = '【公共區域 3 項】';
+        title = '【公共區域 2 項】';
       } else if (category === 'kitchen') {
         selector = 'input[name="chk_kitchen"]';
         title = '【廚房 3 項】';
@@ -1113,7 +1113,7 @@
         <div>
           <h4 class="font-bold text-slate-800 text-xs mb-2">已施作項目清冊 (${r.items.length}/${ALL_CHECK_ITEMS.length})：</h4>
           <div class="space-y-1.5 max-h-56 overflow-y-auto custom-scroll pr-1">
-            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded">【教室內 清潔消毒】</div>
+            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded">【教室內 清潔消毒】(10項)</div>
             ${CLASSROOM_ITEMS.map(item => {
               const isChecked = r.items.includes(item.id);
               return `
@@ -1124,7 +1124,7 @@
               `;
             }).join('')}
 
-            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded mt-2">【公共區域與設施】</div>
+            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded mt-2">【公共區域與設施】(2項)</div>
             ${PUBLIC_ITEMS.map(item => {
               const isChecked = r.items.includes(item.id);
               return `
@@ -1135,7 +1135,7 @@
               `;
             }).join('')}
 
-            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded mt-2">【廚房】消毒</div>
+            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded mt-2">【廚房】消毒 (3項)</div>
             ${KITCHEN_ITEMS.map(item => {
               const isChecked = r.items.includes(item.id);
               return `
