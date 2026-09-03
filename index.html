@@ -16,6 +16,38 @@
       .print-only { display: block !important; }
       body { background: white !important; font-size: 12pt; }
       .print-card { box-shadow: none !important; border: 1px solid #333 !important; }
+
+      /* 當點選列印門牌時，只單獨列印門牌卡片並完美置中 */
+      body.printing-qr-only header,
+      body.printing-qr-only footer,
+      body.printing-qr-only #toast-container,
+      body.printing-qr-only #detail-modal,
+      body.printing-qr-only .no-print-card,
+      body.printing-qr-only #tab-teacher,
+      body.printing-qr-only #tab-admin {
+        display: none !important;
+      }
+      body.printing-qr-only main {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 85vh !important;
+      }
+      body.printing-qr-only #tab-qrcode {
+        display: block !important;
+        width: 100% !important;
+      }
+      body.printing-qr-only #printable-qr-card {
+        margin: 20px auto !important;
+        border: 2.5px solid #000000 !important;
+        border-radius: 1.25rem !important;
+        padding: 2.5rem !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
+      }
     }
     .custom-scroll::-webkit-scrollbar {
       width: 6px;
@@ -415,7 +447,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         <!-- 左側：QR Code 設定面板 -->
-        <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+        <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5 no-print-card">
           <div class="border-b border-slate-100 pb-4">
             <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
               <i data-lucide="qr-code" class="w-5 h-5 text-teal-600"></i>
@@ -466,8 +498,8 @@
         <div class="lg:col-span-7 flex justify-center">
           <div id="printable-qr-card" class="bg-white p-8 rounded-2xl border-2 border-slate-900 shadow-xl max-w-sm w-full text-center space-y-4 print-card">
             <div class="border-b-2 border-slate-900 pb-3">
-              <p class="text-[11px] tracking-widest text-slate-500 font-bold uppercase">Taoyuan City Daxi Tianxin Elementary Preschool</p>
-              <h3 class="text-base font-black text-slate-900 mt-0.5">桃園市大溪區田心國小附設幼兒園</h3>
+              <p class="text-[11px] tracking-widest text-slate-500 font-bold uppercase">TAOYUAN CITY DAXI TIANXIN ELEMENTARY PRESCHOOL</p>
+              <h3 class="text-base font-black text-slate-900 mt-0.5">桃園市大溪區田心國民小學附設幼兒園</h3>
               <div class="mt-2 inline-block px-3 py-1 bg-teal-800 text-white text-xs font-bold rounded-md">
                 環境清潔與消毒 每日檢核專用碼
               </div>
@@ -1235,8 +1267,15 @@
     }
 
     function printQRCodeCard() {
+      // 加入只列印門牌之標籤，隱藏其他所有操作介面
+      document.body.classList.add('printing-qr-only');
       window.print();
     }
+
+    // 列印對話框關閉後自動復原常態畫面
+    window.addEventListener('afterprint', () => {
+      document.body.classList.remove('printing-qr-only');
+    });
 
     function downloadQRCodeImage() {
       const img = document.querySelector('#qrcode-canvas-container img');
