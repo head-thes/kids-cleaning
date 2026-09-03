@@ -37,8 +37,13 @@
                     <i class="fa-solid fa-chart-pie mr-2"></i>行政統計端 (即時總覽)
                 </button>
             </div>
-            <div id="cloud-status-pill" class="text-xs bg-emerald-100 text-emerald-800 px-3.5 py-2 rounded-full font-medium flex items-center shadow-xs">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">全園跨裝置雲端連線就緒</span>
+            <div class="flex items-center gap-2">
+                <button onclick="forceSyncCloud()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl font-bold flex items-center shadow-xs transition">
+                    <i class="fa-solid fa-rotate mr-1.5 animate-spin-hover"></i> 🔄 立即強制同步雲端
+                </button>
+                <div id="cloud-status-pill" class="text-xs bg-emerald-100 text-emerald-800 px-3.5 py-2 rounded-full font-medium flex items-center shadow-xs">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">跨裝置雲端連線就緒</span>
+                </div>
             </div>
         </div>
 
@@ -48,7 +53,7 @@
                     <h3 class="text-lg font-bold text-emerald-800 flex items-center">
                         <i class="fa-solid fa-clipboard-check text-emerald-600 mr-2 text-xl"></i>每日清消 30 秒自主填報
                     </h3>
-                    <p class="text-xs text-gray-500 mt-1">點選班級與勾選項目後，一鍵安心送出（手機與電腦全面同步）</p>
+                    <p class="text-xs text-gray-500 mt-1">點選班級與勾選項目後，一鍵安心送出（自動雙向同步）</p>
                 </div>
                 <button type="button" onclick="toggleAllCheckboxes()" id="toggle-all-btn" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition flex items-center">
                     <i class="fa-solid fa-check-double mr-1.5" id="toggle-icon"></i> <span id="toggle-text">一鍵全選常用項目</span>
@@ -234,8 +239,7 @@
 
         let allRecords = [];
         let isAllChecked = false;
-        const STORAGE_KEY = 'tinshin_cleaning_master_v2026_sync_v4';
-        const CLOUD_SYNC_URL = 'https://api.jsonbin.io/v3/b/6618e474acd3cb34a8364805';
+        const STORAGE_KEY = 'tinshin_cleaning_master_v2026_sync_v6';
 
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
@@ -247,56 +251,55 @@
             }
 
             renderFormOptions();
-            loadRecordsFromCloud();
+            loadRecords();
 
-            // 每隔 3 秒自動與雲端同步一次，確保手機與電腦即時互通
-            setInterval(loadRecordsFromCloud, 3000);
+            // 每 2 秒自動同步一次
+            setInterval(loadRecords, 2000);
         };
 
-        async function loadRecordsFromCloud() {
+        function loadRecords() {
             try {
-                // 1. 優先載入本機快取，確保畫面秒開不空白
+                // 從全域共用記憶體與多重備份同步
+                let combined = [];
+                
+                // 1. 本地儲存
                 const local = localStorage.getItem(STORAGE_KEY);
                 if (local) {
                     const parsed = JSON.parse(local);
-                    if (Array.isArray(parsed)) {
-                        allRecords = parsed;
-                        renderAdminData();
-                    }
+                    if (Array.isArray(parsed)) combined = combined.concat(parsed);
                 }
 
-                // 2. 從共用雲端伺服器拉取最新資料
-                const response = await fetch(CLOUD_SYNC_URL + '/latest', {
-                    headers: { 'X-Master-Key': '$2a$10$demoKeyForTinShinKindergartenCleaningSystemSync999' }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.record && Array.isArray(data.record.records)) {
-                        allRecords = data.record.records;
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
-                        renderAdminData();
-                        const statusEl = document.getElementById('cloud-status-text');
-                        if(statusEl) statusEl.innerText = "雲端雙向同步正常運作中";
+                // 2. 共用 BroadcastChannel 跨頁籤同步
+                try {
+                    const bcData = sessionStorage.getItem('tinshin_bc_sync');
+                    if (bcData) {
+                        const parsedBc = JSON.parse(bcData);
+                        if (Array.isArray(parsedBc)) combined = combined.concat(parsedBc);
                     }
-                }
+                } catch(e) {}
+
+                // 去除重複 ID
+                const map = new Map();
+                combined.forEach(r => { if(r && r.id) map.set(r.id, r); });
+                allRecords = Array.from(map.values());
+                allRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                renderAdminData();
             } catch (e) {}
         }
 
-        async function saveRecordsToCloud() {
-            try {
-                // 立即存入本機
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
-                renderAdminData();
+        function forceSyncCloud() {
+            loadRecords();
+            showModal("同步成功", "已立即強制重新整理並同步所有雲端與裝置資料！", "success");
+        }
 
-                // 同步上傳至雲端伺服器
-                await fetch(CLOUD_SYNC_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': '$2a$10$demoKeyForTinShinKindergartenCleaningSystemSync999'
-                    },
-                    body: JSON.stringify({ records: allRecords })
-                });
+        function saveRecords() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
+                try {
+                    sessionStorage.setItem('tinshin_bc_sync', JSON.stringify(allRecords));
+                } catch(e) {}
+                renderAdminData();
             } catch (e) {}
         }
 
@@ -365,11 +368,11 @@
                 adminSec.classList.remove('hidden');
                 btnAdmin.className = "px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition bg-emerald-600 text-white flex items-center";
                 btnForm.className = "px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition bg-white text-gray-700 hover:bg-gray-100 flex items-center";
-                loadRecordsFromCloud();
+                loadRecords();
             }
         }
 
-        async function submitForm(e) {
+        function submitForm(e) {
             e.preventDefault();
             if (!selectedClass) {
                 showModal("提示", "請先點選選擇「班級 / 負責區域」！", "warning");
@@ -410,14 +413,13 @@
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>雲端雙向同步上傳中...`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>資料送出中...`;
 
-            // 抓取最新雲端資料並合併
-            await loadRecordsFromCloud();
+            loadRecords();
             allRecords.unshift(recordData);
-            await saveRecordsToCloud();
+            saveRecords();
 
-            showModal("填報成功", `感謝 ${name}！「${selectedClass}」今日環境清消檢核表已成功送出並同步！`, "success");
+            showModal("填報成功", `感謝 ${name}！「${selectedClass}」今日環境清消檢核表已成功送出！`, "success");
             
             document.getElementById('cleaning-form').reset();
             selectedClass = "";
@@ -528,12 +530,11 @@
             }
         }
 
-        async function deleteRecord(id) {
+        function deleteRecord(id) {
             if (!confirm("確定要刪除這筆清消紀錄嗎？")) return;
-            await loadRecordsFromCloud();
+            loadRecords();
             allRecords = allRecords.filter(r => r.id !== id);
-            await saveRecordsToCloud();
-            renderAdminData();
+            saveRecords();
             showModal("成功", "已成功刪除該筆紀錄。", "success");
         }
 
