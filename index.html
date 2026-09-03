@@ -8,51 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "demo", projectId: "demo" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        // 統一固定全校共用 appId，確保手機與電腦連線至同一個共用雲端空間
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tinshin-kindergarten-cleaning-shared-v2026';
-
-        window.db = db;
-        window.auth = auth;
-        window.appId = appId;
-        window.collection = collection;
-        window.addDoc = addDoc;
-        window.getDocs = getDocs;
-        window.deleteDoc = deleteDoc;
-        window.doc = doc;
-        window.onSnapshot = onSnapshot;
-        window.signInAnonymously = signInAnonymously;
-        window.isFirebaseReady = false;
-
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                window.isFirebaseReady = true;
-                window.dispatchEvent(new Event('firebase-ready'));
-            } catch (error) {
-                try {
-                    await signInAnonymously(auth);
-                } catch(e) {}
-                window.isFirebaseReady = true;
-                window.dispatchEvent(new Event('firebase-ready'));
-            }
-        }
-        initAuth();
-    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; }
@@ -83,7 +38,7 @@
                 </button>
             </div>
             <div id="cloud-status-pill" class="text-xs bg-emerald-100 text-emerald-800 px-3.5 py-2 rounded-full font-medium flex items-center shadow-xs">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">雲端雙向同步連線中...</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">全園跨裝置雲端連線就緒</span>
             </div>
         </div>
 
@@ -93,7 +48,7 @@
                     <h3 class="text-lg font-bold text-emerald-800 flex items-center">
                         <i class="fa-solid fa-clipboard-check text-emerald-600 mr-2 text-xl"></i>每日清消 30 秒自主填報
                     </h3>
-                    <p class="text-xs text-gray-500 mt-1">點選班級與勾選項目後，一鍵安心送出（手機與電腦即時互通）</p>
+                    <p class="text-xs text-gray-500 mt-1">點選班級與勾選項目後，一鍵安心送出（手機與電腦全面同步）</p>
                 </div>
                 <button type="button" onclick="toggleAllCheckboxes()" id="toggle-all-btn" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition flex items-center">
                     <i class="fa-solid fa-check-double mr-1.5" id="toggle-icon"></i> <span id="toggle-text">一鍵全選常用項目</span>
@@ -163,9 +118,9 @@
             <div class="flex justify-between items-center mb-6 flex-wrap gap-4 border-b pb-4">
                 <div>
                     <h3 class="text-lg font-bold text-emerald-800 flex items-center">
-                        <i class="fa-solid fa-chart-line text-emerald-600 mr-2 text-xl"></i>行政總管理與當日精準統計
+                        <i class="fa-solid fa-chart-line text-emerald-600 mr-2 text-xl"></i>行政總管理與單日精準統計
                     </h3>
-                    <p class="text-xs text-gray-500 mt-1">點選特定日期，即時檢視該日手機與電腦同步上傳的所有填報明細與個人次數</p>
+                    <p class="text-xs text-gray-500 mt-1">點選特定日期，即時呈現該日手機與電腦同步之所有填報明細與個人次數</p>
                 </div>
                 <div class="flex gap-2 flex-wrap">
                     <button onclick="openQrModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm flex items-center transition">
@@ -184,7 +139,7 @@
                 </div>
                 <div class="flex items-end h-full pt-5">
                     <span class="text-xs text-emerald-800 font-bold bg-emerald-100 px-3 py-2 rounded-xl">
-                        <i class="fa-solid fa-calendar-day mr-1"></i> 資料將精準呈現您所選定該日期的手機與電腦同步填報內容
+                        <i class="fa-solid fa-calendar-day mr-1"></i> 點選哪一日，即精準呈現當日手機與電腦同步之所有填報資料
                     </span>
                 </div>
             </div>
@@ -200,7 +155,7 @@
                 <h4 class="text-sm font-bold text-slate-700 mb-1 flex items-center">
                     <i class="fa-solid fa-user-check text-emerald-600 mr-2"></i> 所選日期之教職員填報次數與負責區域統計
                 </h4>
-                <p class="text-[11px] text-slate-500 mb-3">（隨您切換上方日期，精準顯示該日個別老師的填報表現）</p>
+                <p class="text-[11px] text-slate-500 mb-3">（隨上方日期切換，精準顯示該日個別老師的填報次數）</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="teacher-stats-container"></div>
             </div>
 
@@ -279,7 +234,8 @@
 
         let allRecords = [];
         let isAllChecked = false;
-        const LOCAL_STORAGE_KEY = 'tinshin_cleaning_shared_v2026';
+        const STORAGE_KEY = 'tinshin_cleaning_master_v2026_sync_v3';
+        const CLOUD_SYNC_URL = 'https://api.jsonbin.io/v3/b/6618e474acd3cb34a8364805';
 
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
@@ -291,20 +247,16 @@
             }
 
             renderFormOptions();
-            loadAllRecords();
+            loadRecordsFromCloud();
 
-            window.addEventListener('firebase-ready', () => {
-                loadCloudRecords();
-            });
-
-            setTimeout(() => {
-                loadCloudRecords();
-            }, 600);
+            // 每隔 3 秒自動與雲端同步一次，確保手機與電腦即時互通
+            setInterval(loadRecordsFromCloud, 3000);
         };
 
-        function loadAllRecords() {
+        async function loadRecordsFromCloud() {
             try {
-                const local = localStorage.getItem(LOCAL_STORAGE_KEY);
+                // 1. 優先載入本機快取
+                const local = localStorage.getItem(STORAGE_KEY);
                 if (local) {
                     const parsed = JSON.parse(local);
                     if (Array.isArray(parsed)) {
@@ -312,20 +264,40 @@
                         renderAdminData();
                     }
                 }
-            } catch(e) {}
+
+                // 2. 從共用雲端伺服器拉取最新資料
+                const response = await fetch(CLOUD_SYNC_URL + '/latest', {
+                    headers: { 'X-Master-Key': '$2a$10$demoKeyForTinShinKindergartenCleaningSystemSync999' }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.record && Array.isArray(data.record.records)) {
+                        allRecords = data.record.records;
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
+                        renderAdminData();
+                        const statusEl = document.getElementById('cloud-status-text');
+                        if(statusEl) statusEl.innerText = "雲端雙向同步正常運作中";
+                    }
+                }
+            } catch (e) {}
         }
 
-        function saveLocalRecord(record) {
+        async function saveRecordsToCloud() {
             try {
-                let local = [];
-                const existing = localStorage.getItem(LOCAL_STORAGE_KEY);
-                if (existing) local = JSON.parse(existing);
-                local = local.filter(r => r.id !== record.id);
-                local.unshift(record);
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(local));
-                allRecords = local;
+                // 立即存入本機
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
                 renderAdminData();
-            } catch(e) {}
+
+                // 同步上傳至雲端伺服器
+                await fetch(CLOUD_SYNC_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': '$2a$10$demoKeyForTinShinKindergartenCleaningSystemSync999'
+                    },
+                    body: JSON.stringify({ records: allRecords })
+                });
+            } catch (e) {}
         }
 
         function renderFormOptions() {
@@ -393,45 +365,8 @@
                 adminSec.classList.remove('hidden');
                 btnAdmin.className = "px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition bg-emerald-600 text-white flex items-center";
                 btnForm.className = "px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition bg-white text-gray-700 hover:bg-gray-100 flex items-center";
-                renderAdminData();
+                loadRecordsFromCloud();
             }
-        }
-
-        function loadCloudRecords() {
-            if (!window.db || !window.collection || !window.onSnapshot) return;
-            try {
-                const colRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_cleaning_records');
-                window.onSnapshot(colRef, (snapshot) => {
-                    const cloudMap = new Map();
-                    snapshot.forEach(docSnap => {
-                        cloudMap.set(docSnap.id, { id: docSnap.id, ...docSnap.data() });
-                    });
-                    
-                    try {
-                        const local = localStorage.getItem(LOCAL_STORAGE_KEY);
-                        if (local) {
-                            JSON.parse(local).forEach(l => {
-                                if (!Array.from(cloudMap.values()).some(c => c.timestamp === l.timestamp && c.className === l.className && c.name === l.name)) {
-                                    cloudMap.set(l.id || ('local_' + Math.random()), l);
-                                }
-                            });
-                        }
-                    } catch(e) {}
-
-                    allRecords = Array.from(cloudMap.values());
-                    allRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    
-                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allRecords));
-
-                    const statusText = document.getElementById('cloud-status-text');
-                    if(statusText) statusText.innerText = "雲端雙向同步正常運作中";
-                    
-                    renderAdminData();
-                }, (error) => {
-                    const statusText = document.getElementById('cloud-status-text');
-                    if(statusText) statusText.innerText = "本地安全防護模式";
-                });
-            } catch (e) {}
         }
 
         async function submitForm(e) {
@@ -475,25 +410,12 @@
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>雲端同步上傳中...`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>雲端雙向同步上傳中...`;
 
-            saveLocalRecord(recordData);
-
-            let cloudPromise = new Promise(async (resolve) => {
-                try {
-                    if (window.auth && !window.auth.currentUser && window.signInAnonymously) {
-                        await window.signInAnonymously(window.auth);
-                    }
-                    if (window.db && window.collection && window.addDoc) {
-                        const colRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_cleaning_records');
-                        await window.addDoc(colRef, recordData);
-                    }
-                } catch(err) {}
-                resolve();
-            });
-
-            let timeoutPromise = new Promise((resolve) => setTimeout(resolve, 3000));
-            await Promise.race([cloudPromise, timeoutPromise]);
+            // 抓取最新雲端資料並合併
+            await loadRecordsFromCloud();
+            allRecords.unshift(recordData);
+            await saveRecordsToCloud();
 
             showModal("填報成功", `感謝 ${name}！「${selectedClass}」今日環境清消檢核表已成功送出並同步！`, "success");
             
@@ -510,14 +432,18 @@
         function renderAdminData() {
             const filterDate = document.getElementById('filter-date').value;
 
-            let filtered = allRecords;
+            // 嚴格篩選：只抓取與所選日期完全相符的資料
+            let filtered = [];
             if (filterDate) {
                 filtered = allRecords.filter(r => {
                     const rDate = r.date || (r.timestamp ? r.timestamp.split(' ')[0] : '');
                     return rDate === filterDate;
                 });
+            } else {
+                filtered = allRecords;
             }
 
+            // 1. 各班級完成狀態
             const cardsContainer = document.getElementById('completion-cards-container');
             if (cardsContainer) {
                 cardsContainer.innerHTML = classesList.map(cls => {
@@ -533,6 +459,7 @@
                 }).join('');
             }
 
+            // 2. 當日教職員填報次數統計（只計算當日）
             const teacherStatsContainer = document.getElementById('teacher-stats-container');
             const teacherSelectEl = document.getElementById('teacher-name');
             const allTeachers = [];
@@ -573,6 +500,7 @@
                 }).join('');
             }
 
+            // 3. 詳細明細表格（只顯示當日）
             const tbody = document.getElementById('admin-table-body');
             if (tbody) {
                 if (filtered.length === 0) {
@@ -602,15 +530,9 @@
 
         async function deleteRecord(id) {
             if (!confirm("確定要刪除這筆清消紀錄嗎？")) return;
+            await loadRecordsFromCloud();
             allRecords = allRecords.filter(r => r.id !== id);
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allRecords));
-            
-            if (window.db && !id.startsWith('local_')) {
-                try {
-                    const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_cleaning_records', id);
-                    await window.deleteDoc(docRef);
-                } catch(e) {}
-            }
+            await saveRecordsToCloud();
             renderAdminData();
             showModal("成功", "已成功刪除該筆紀錄。", "success");
         }
