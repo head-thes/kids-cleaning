@@ -39,7 +39,7 @@
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="forceSyncCloud()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl font-bold flex items-center shadow-xs transition">
-                    <i class="fa-solid fa-rotate mr-1.5 animate-spin-hover"></i> 🔄 立即強制同步雲端
+                    <i class="fa-solid fa-rotate mr-1.5"></i> 🔄 立即強制同步雲端
                 </button>
                 <div id="cloud-status-pill" class="text-xs bg-emerald-100 text-emerald-800 px-3.5 py-2 rounded-full font-medium flex items-center shadow-xs">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2"></span> <span id="cloud-status-text">跨裝置雲端連線就緒</span>
@@ -596,20 +596,3 @@
             document.getElementById('modal-message').innerText = message;
             const iconEl = document.getElementById('modal-icon');
             if(type === 'success') {
-                iconEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i>`;
-            } else if(type === 'warning') {
-                iconEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>`;
-            } else {
-                iconEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-500"></i>`;
-            }
-            document.getElementById('custom-modal').classList.add('flex');
-            document.getElementById('custom-modal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('custom-modal').classList.add('hidden');
-            document.getElementById('custom-modal').classList.remove('flex');
-        }
-    </script>
-</body>
-</html>
