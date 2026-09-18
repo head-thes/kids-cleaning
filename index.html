@@ -3,1373 +3,713 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>桃園市大溪區田心國民小學附設幼兒園 - 環境清潔與消毒自主檢核管理系統</title>
+  <title>桃園市大溪區田心國民小學附設幼兒園 - 環境清潔與消毒自主檢核管理系統 (中央同步版)</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- QRCode.js CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    @media print {
-      .no-print { display: none !important; }
-      .print-only { display: block !important; }
-      body { background: white !important; font-size: 12pt; }
-      .print-card { box-shadow: none !important; border: 1px solid #333 !important; }
-
-      body.printing-qr-only header,
-      body.printing-qr-only footer,
-      body.printing-qr-only #toast-container,
-      body.printing-qr-only #detail-modal,
-      body.printing-qr-only .no-print-card,
-      body.printing-qr-only #tab-teacher,
-      body.printing-qr-only #tab-admin {
-        display: none !important;
-      }
-      body.printing-qr-only main {
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        min-height: 85vh !important;
-      }
-      body.printing-qr-only #tab-qrcode {
-        display: block !important;
-        width: 100% !important;
-      }
-      body.printing-qr-only #printable-qr-card {
-        margin: 20px auto !important;
-        border: 2.5px solid #000000 !important;
-        border-radius: 1.25rem !important;
-        padding: 2.5rem !important;
-        box-shadow: none !important;
-        page-break-inside: avoid !important;
-      }
-    }
-    .custom-scroll::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background-color: #cbd5e1;
-      border-radius: 9999px;
-    }
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.3; transform: scale(0.85); }
-    }
-    .animate-pulse-dot {
-      animation: pulse-dot 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body { font-family: 'Noto Sans TC', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- 頂部導覽列與校名抬頭 -->
-  <header class="bg-teal-700 text-white shadow-md sticky top-0 z-40 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <!-- 頂部 Header -->
+  <header class="bg-[#005a40] text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 flex flex-wrap justify-between items-center gap-3">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-full bg-white text-teal-800 flex items-center justify-center font-bold text-xl shadow-inner">
+        <div class="w-10 h-10 rounded-full bg-white text-[#005a40] flex items-center justify-center font-black text-xl shadow-inner">
           田
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-wide">桃園市大溪區田心國民小學附設幼兒園</h1>
-            <!-- 雲端同步狀態標籤 -->
-            <span id="cloud-sync-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-teal-800/90 text-teal-100 border border-teal-500/50">
-              <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-dot"></span>
-              <span id="sync-status-text">中央雲端連線中...</span>
+            <span id="syncStatusBadge" class="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#024330] text-emerald-100">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+              中央雲端同步中
             </span>
           </div>
-          <p class="text-xs text-teal-100 flex items-center gap-1">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 inline"></i> 環境清潔與消毒自主檢核管理系統 (中央同步版)
-          </p>
+          <p class="text-xs text-emerald-200">環境清潔與消毒自主檢核管理系統 (中央同步版)</p>
         </div>
       </div>
-      
-      <!-- 標籤切換頁籤 -->
-      <nav class="flex space-x-1 bg-teal-800/80 p-1 rounded-xl self-start md:self-auto text-sm">
-        <button id="nav-teacher" onclick="switchTab('teacher')" class="px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-white text-teal-800 shadow-sm">
-          <i data-lucide="clipboard-pen" class="w-4 h-4"></i> 教師快速填報
+
+      <!-- 導覽切換 Tab -->
+      <nav class="flex bg-[#004732] p-1 rounded-xl text-sm font-medium gap-1">
+        <button id="tabFillBtn" onclick="switchTab('fill')" class="px-4 py-1.5 rounded-lg transition bg-white text-[#005a40] shadow-sm font-bold flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          教師快速填報
         </button>
-        <button id="nav-admin" onclick="switchTab('admin')" class="px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-1.5 text-teal-100 hover:text-white">
-          <i data-lucide="bar-chart-3" class="w-4 h-4"></i> 行政統計端
+        <button id="tabAdminBtn" onclick="switchTab('admin')" class="px-4 py-1.5 rounded-lg transition text-emerald-100 hover:text-white flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          行政統計端
         </button>
-        <button id="nav-qrcode" onclick="switchTab('qrcode')" class="px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-1.5 text-teal-100 hover:text-white">
-          <i data-lucide="qr-code" class="w-4 h-4"></i> 行動 QR Code
+        <button id="tabQrBtn" onclick="switchTab('qr')" class="px-4 py-1.5 rounded-lg transition text-emerald-100 hover:text-white flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+          行動 QR Code
         </button>
       </nav>
     </div>
   </header>
 
-  <!-- 主內容區 -->
-  <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- 主要內容區 -->
+  <main class="flex-grow max-w-7xl mx-auto w-full p-4 sm:p-6">
 
-    <!-- ============================================== -->
-    <!-- TAB 1: 教師快速填報端 (TEACHER FORM) -->
-    <!-- ============================================== -->
-    <section id="tab-teacher" class="space-y-6">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8">
+    <!-- 頁面一：教師填報端 (綠色卡片視覺介面) -->
+    <div id="viewFill" class="space-y-6">
+      
+      <div class="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border border-slate-200 space-y-6">
         
-        <!-- 表頭與連動提示條 -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-100 gap-4">
+        <!-- 表格標題與右側功能列 -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <span class="w-2.5 h-6 bg-teal-600 rounded-full inline-block"></span>
+              <span class="w-2.5 h-6 bg-[#005a40] rounded-full inline-block"></span>
               每日班級環境清潔與消毒檢核表
             </h2>
-            <p class="text-sm text-slate-500 mt-1">
-              手機填報送出後，資料直接寫入全園共用中央資料庫，行政端與所有設備即刻同步！
-            </p>
+            <p class="text-xs text-slate-500 mt-1">手機填報送出後，資料直接寫入全園共用中央資料庫，行政端與所有設備即刻同步！</p>
           </div>
-          <div class="flex items-center gap-2 self-start sm:self-auto">
-            <button type="button" onclick="loadFromCloud(true)" class="px-3 py-1.5 rounded-lg text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium flex items-center gap-1 transition">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="sync-icon"></i>
-              <span>重新整理資料</span>
+          <div class="flex items-center gap-2 text-xs">
+            <button onclick="loadCentralData()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              重新整理資料
             </button>
-            <div class="text-xs bg-teal-50 text-teal-800 px-3 py-1.5 rounded-lg font-medium border border-teal-200/60 flex items-center gap-1">
-              <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-              <span id="current-time-display">載入中...</span>
+            <div class="px-3 py-1.5 bg-emerald-50 text-[#005a40] rounded-xl font-medium border border-emerald-100 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span id="currentTimeDisplay">2026/09/18 下午 06:27</span>
             </div>
           </div>
         </div>
 
-        <form id="check-form" onsubmit="handleFormSubmit(event)" class="mt-6 space-y-6">
+        <!-- 填報表單 -->
+        <form id="checkForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
           
-          <!-- 基本資訊列：日期、填報人員下拉 -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/60">
+          <!-- 第一層：檢核日期 與 填報人員 (更正後名單) -->
+          <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
-                <i data-lucide="calendar" class="w-3.5 h-3.5 text-teal-600"></i> 檢核日期 *
+              <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#005a40]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                檢核日期 *
               </label>
-              <input type="date" id="form-date" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
+              <input type="date" id="fillDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#005a40] focus:outline-none font-medium text-slate-800">
             </div>
-
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
-                <i data-lucide="user-check" class="w-3.5 h-3.5 text-teal-600"></i> 填報人員 *
+              <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#005a40]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                填報人員 *
               </label>
-              <select id="form-recorder" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-teal-500 focus:outline-none">
-                <option value="" disabled selected>請選擇您的姓名...</option>
-                <option value="王姿予老師">王姿予老師</option>
-                <option value="朱惠甄老師">朱惠甄老師</option>
-                <option value="李淑貞老師">李淑貞老師</option>
-                <option value="林鈺穎老師">林鈺穎老師</option>
-                <option value="傅滙珠老師">傅滙珠老師</option>
-                <option value="楊家妃老師">楊家妃老師</option>
-                <option value="蔡依儒老師">蔡依儒老師</option>
-                <option value="蔡昀螢主任">蔡昀螢主任</option>
-                <option value="陳昱文老師">陳昱文老師</option>
-                <option value="陳芯穎阿姨">陳芯穎阿姨</option>
-                <option value="謝宜真老師">謝宜真老師</option>
-                <option value="謝佩純老師">謝佩純老師</option>
-                <option value="謝惠昭阿姨">謝惠昭阿姨</option>
+              <select id="fillStaff" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#005a40] focus:outline-none font-medium text-slate-800">
+                <option value="">請選擇您的姓名...</option>
+                <option value="蔡昀螢主任">蔡昀螢 主任</option>
+                <option value="朱惠甄老師">朱惠甄 老師</option>
+                <option value="陳昱文老師">陳昱文 老師</option>
+                <option value="謝佩純老師">謝佩純 老師</option>
+                <option value="蔡依儒老師">蔡依儒 老師</option>
+                <option value="林鈺穎老師">林鈺穎 老師</option>
+                <option value="王姿予老師">王姿予 老師</option>
+                <option value="傅滙珠老師">傅滙珠 老師</option>
+                <option value="李淑貞老師">李淑貞 老師</option>
+                <option value="楊家妃老師">楊家妃 老師</option>
+                <option value="謝宜真老師">謝宜真 老師</option>
+                <option value="陳芯穎阿姨">陳芯穎 阿姨</option>
+                <option value="謝惠昭阿姨">謝惠昭 阿姨</option>
+                <option value="行政輪值">行政輪值</option>
               </select>
             </div>
           </div>
 
-          <!-- 使用之消毒藥劑與濃度：標準補充說明呈現 -->
-          <div class="bg-teal-50/80 border border-teal-200/80 rounded-2xl p-4 text-xs text-teal-950 space-y-2">
-            <div class="font-bold flex items-center gap-1.5 text-teal-800 text-sm">
-              <i data-lucide="flask-conical" class="w-4 h-4 text-teal-600"></i>
+          <!-- 第二層：環境消毒藥劑配製與使用標準規範 (3 卡，無紫外線) -->
+          <div class="p-5 bg-emerald-50/40 rounded-2xl border border-emerald-100 space-y-3">
+            <h3 class="text-xs font-bold text-[#005a40] flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
               環境消毒藥劑配製與使用標準規範（請依幼兒園防疫指引施作）：
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
-              <div class="bg-white/80 p-2.5 rounded-xl border border-teal-100 shadow-xs">
-                <span class="font-bold text-teal-800 block mb-0.5">● 500ppm 稀釋漂白水</span>
-                <span class="text-slate-600">日常環境清消（課桌椅、積木玩具、地板、洗手間及門把）。</span>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+              <div class="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm">
+                <div class="font-bold text-[#005a40] flex items-center gap-1.5 mb-1">
+                  <span class="w-2 h-2 rounded-full bg-[#005a40]"></span>
+                  500ppm 稀釋漂白水
+                </div>
+                <div class="text-slate-500 leading-relaxed text-[11px]">
+                  日常環境清消（課桌椅、積木玩具、地板、洗手間及門把）。
+                </div>
               </div>
-              <div class="bg-white/80 p-2.5 rounded-xl border border-teal-100 shadow-xs">
-                <span class="font-bold text-teal-800 block mb-0.5">● 75% 藥用酒精</span>
-                <span class="text-slate-600">金屬接觸面、電器遙控器、電燈開關及不宜浸泡之細緻教具。</span>
+              <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                <div class="font-bold text-blue-900 flex items-center gap-1.5 mb-1">
+                  <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                  75% 藥用酒精
+                </div>
+                <div class="text-slate-500 leading-relaxed text-[11px]">
+                  金屬接觸面、電器遙控器、電燈開關及不宜浸泡之細緻教具。
+                </div>
               </div>
-              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-200 bg-amber-50/40 shadow-xs">
-                <span class="font-bold text-amber-800 block mb-0.5">● 1000ppm 漂白水加強</span>
-                <span class="text-slate-600">腸病毒、諾羅病毒等傳染病好發或班級通報加強清消。</span>
+              <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm">
+                <div class="font-bold text-amber-900 flex items-center gap-1.5 mb-1">
+                  <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                  1000ppm 漂白水加強
+                </div>
+                <div class="text-slate-500 leading-relaxed text-[11px]">
+                  腸病毒、諾羅病毒等傳染病好發或班級通報加強清消。
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 選擇班級 / 負責區域（按鈕式單選） -->
+          <!-- 第三層：選擇班級 / 負責區域 (按鈕陣列) -->
           <div class="space-y-2">
-            <label class="block text-sm font-bold text-emerald-800 flex items-center gap-1.5">
-              <i data-lucide="layout-grid" class="w-4 h-4 text-emerald-700"></i>
+            <label class="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-[#005a40]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
               選擇班級 / 負責區域 *
             </label>
-            <input type="hidden" id="form-class" value="星星班" required>
+            <input type="hidden" id="fillArea" required value="星星班">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5" id="areaButtonGroup">
+              <button type="button" onclick="selectArea('星星班')" class="area-btn py-3 rounded-xl border font-bold text-sm transition text-center shadow-sm bg-[#005a40] text-white border-[#005a40]">星星班</button>
+              <button type="button" onclick="selectArea('月亮班')" class="area-btn py-3 rounded-xl border font-medium text-sm transition text-center shadow-sm bg-white text-slate-700 border-slate-200 hover:border-[#005a40]">月亮班</button>
+              <button type="button" onclick="selectArea('彩虹班')" class="area-btn py-3 rounded-xl border font-medium text-sm transition text-center shadow-sm bg-white text-slate-700 border-slate-200 hover:border-[#005a40]">彩虹班</button>
+              <button type="button" onclick="selectArea('白雲班')" class="area-btn py-3 rounded-xl border font-medium text-sm transition text-center shadow-sm bg-white text-slate-700 border-slate-200 hover:border-[#005a40]">白雲班</button>
+              <button type="button" onclick="selectArea('小樹苗班')" class="area-btn py-3 rounded-xl border font-medium text-sm transition text-center shadow-sm bg-white text-slate-700 border-slate-200 hover:border-[#005a40]">小樹苗班</button>
+              <button type="button" onclick="selectArea('廚房')" class="area-btn py-3 rounded-xl border font-medium text-sm transition text-center shadow-sm bg-white text-slate-700 border-slate-200 hover:border-[#005a40]">廚房</button>
+            </div>
+          </div>
+
+          <!-- 第四層：檢核項目勾選區 (共 15 項) -->
+          <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-6">
             
-            <div id="class-button-group" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-              <button type="button" onclick="selectClassArea('星星班')" class="class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-emerald-600 border-emerald-600 text-white ring-2 ring-emerald-300" data-area="星星班">
-                星星班
-              </button>
-              <button type="button" onclick="selectClassArea('月亮班')" class="class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/40" data-area="月亮班">
-                月亮班
-              </button>
-              <button type="button" onclick="selectClassArea('彩虹班')" class="class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/40" data-area="彩虹班">
-                彩虹班
-              </button>
-              <button type="button" onclick="selectClassArea('白雲班')" class="class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/40" data-area="白雲班">
-                白雲班
-              </button>
-              <button type="button" onclick="selectClassArea('小樹苗班')" class="class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/40" data-area="小樹苗班">
-                小樹苗班
-              </button>
-              <button type="button" onclick="selectClassArea('廚房')" class="class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/40" data-area="廚房">
-                廚房
-              </button>
-            </div>
-          </div>
-
-          <!-- 區塊一：【教室內】清潔消毒（共 10 項） -->
-          <div class="space-y-3 pt-2">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
-              <h3 class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
-                <i data-lucide="home" class="w-4 h-4 text-emerald-700"></i>
-                【教室內】清潔消毒，完成的地方，請選擇（可多選）：
-              </h3>
-              <button type="button" id="toggle-classroom-btn" onclick="toggleCategoryItems('classroom')" class="text-xs px-3 py-1.5 rounded-lg bg-teal-50 border border-teal-300 text-teal-700 hover:bg-teal-100 transition font-medium flex items-center gap-1">
-                <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
-                <span id="toggle-classroom-text">教室內 一鍵全選 (10項)</span>
-              </button>
-            </div>
-            <div id="classroom-items-container" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-          </div>
-
-          <!-- 區塊二：【公共區域與設施】消毒（共 2 項） -->
-          <div class="space-y-3 pt-2">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
-              <h3 class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
-                <i data-lucide="building-2" class="w-4 h-4 text-emerald-700"></i>
-                【公共區域與設施】消毒，完成的地方，請選擇（可多選）：
-              </h3>
-              <button type="button" id="toggle-public-btn" onclick="toggleCategoryItems('public')" class="text-xs px-3 py-1.5 rounded-lg bg-teal-50 border border-teal-300 text-teal-700 hover:bg-teal-100 transition font-medium flex items-center gap-1">
-                <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
-                <span id="toggle-public-text">公共區 一鍵全選 (2項)</span>
-              </button>
-            </div>
-            <div id="public-items-container" class="grid grid-cols-1 gap-3"></div>
-          </div>
-
-          <!-- 區塊三：【廚房】消毒（獨立區塊，共 3 項） -->
-          <div class="space-y-3 pt-2">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
-              <h3 class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
-                <i data-lucide="utensils" class="w-4 h-4 text-emerald-700"></i>
-                【廚房】消毒，完成的地方，請選擇（可多選）：
-              </h3>
-              <button type="button" id="toggle-kitchen-btn" onclick="toggleCategoryItems('kitchen')" class="text-xs px-3 py-1.5 rounded-lg bg-teal-50 border border-teal-300 text-teal-700 hover:bg-teal-100 transition font-medium flex items-center gap-1">
-                <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
-                <span id="toggle-kitchen-text">廚房 一鍵全選 (3項)</span>
-              </button>
-            </div>
-            <div id="kitchen-items-container" class="grid grid-cols-1 gap-3"></div>
-          </div>
-
-          <!-- 全域進度總覽與總全選 -->
-          <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-            <div class="flex items-center gap-2">
-              <span class="text-xs sm:text-sm font-semibold text-slate-700">全案檢核進度：</span>
-              <span id="checked-progress-badge" class="text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-700 font-bold">
-                已選 0 / 15 項
+            <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+              <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                <span>快速勾選：</span>
+                <span id="checkProgressText" class="text-emerald-700 font-bold">已選 0 / 15 項</span>
               </span>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="toggleCategory('all', true)" class="px-3 py-1 bg-[#005a40] hover:bg-emerald-800 text-white rounded-lg transition font-medium">全區一鍵全選 (15項)</button>
+                <button type="button" onclick="toggleCategory('all', false)" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition font-medium">全部取消</button>
+              </div>
             </div>
-            <button type="button" onclick="toggleAllItemsGlobal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-teal-600 text-white hover:bg-teal-700 shadow-xs transition flex items-center gap-1.5">
-              <i data-lucide="list-checks" class="w-4 h-4"></i>
-              <span id="toggle-all-global-text">全區一鍵全選 (15項)</span>
-            </button>
+
+            <!-- 分類 A：教室內清潔消毒（10 項，第 10 項為配膳區） -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between border-b border-emerald-100 pb-2">
+                <h3 class="font-bold text-[#005a40] text-sm flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#005a40]"></span>
+                  【教室內】清潔消毒，完成的地方，請選擇（可多選）：
+                </h3>
+                <button type="button" onclick="toggleCategory('classroom', true)" class="text-xs text-[#005a40] hover:text-emerald-900 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 font-medium">教室內 一鍵全選 (10項)</button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5" id="classroomItemsContainer"></div>
+            </div>
+
+            <!-- 分類 B：公共區域與設施（2 項） -->
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between border-b border-teal-100 pb-2">
+                <h3 class="font-bold text-teal-900 text-sm flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-teal-600"></span>
+                  【公共區域與設施】消毒，完成的地方，請選擇（可多選）：
+                </h3>
+                <button type="button" onclick="toggleCategory('public', true)" class="text-xs text-teal-700 hover:text-teal-900 bg-teal-50 px-2.5 py-0.5 rounded-lg border border-teal-200 font-medium">公共區 一鍵全選 (2項)</button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5" id="publicItemsContainer"></div>
+            </div>
+
+            <!-- 分類 C：廚房（3 項） -->
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between border-b border-amber-100 pb-2">
+                <h3 class="font-bold text-amber-900 text-sm flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                  【廚房】消毒，完成的地方，請選擇（可多選）：
+                </h3>
+                <button type="button" onclick="toggleCategory('kitchen', true)" class="text-xs text-amber-800 hover:text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200 font-medium">廚房 一鍵全選 (3項)</button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5" id="kitchenItemsContainer"></div>
+            </div>
+
+            <!-- 備註 -->
+            <div class="pt-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">特殊通報或備註事項（如：雨天戶外遊具暫未施作、特殊消毒情事等）：</label>
+              <textarea id="fillRemarks" rows="2" placeholder="可留空，若有特殊狀況請在此填寫..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-[#005a40] focus:outline-none"></textarea>
+            </div>
+
+            <!-- 送出按鈕 -->
+            <div class="pt-2">
+              <button type="submit" id="submitBtn" class="w-full py-4 bg-[#005a40] hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition text-base flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>立即確認送出檢核紀錄</span>
+              </button>
+            </div>
           </div>
 
-          <!-- 備註事項 -->
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
-              <i data-lucide="message-square" class="w-3.5 h-3.5 text-teal-600"></i>
-              備註事項或特殊狀況說明（選填）：
-            </label>
-            <textarea id="form-notes" rows="2" placeholder="如有特殊狀況或耗材補充可在此填寫..." class="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
-          </div>
-
-          <!-- 送出按鈕 -->
-          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-            <button type="button" onclick="resetTeacherForm()" class="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-100 transition">
-              清空重填
-            </button>
-            <button type="submit" id="submit-btn" class="px-7 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 active:scale-95">
-              <i data-lucide="send" class="w-4 h-4"></i>
-              <span id="submit-btn-text">送出檢核紀錄 (即時同步雲端)</span>
-            </button>
-          </div>
         </form>
       </div>
-    </section>
 
-    <!-- ============================================== -->
-    <!-- TAB 2: 行政統計與查核端 (ADMIN STATS) -->
-    <!-- ============================================== -->
-    <section id="tab-admin" class="hidden space-y-6">
+    </div>
+
+    <!-- 頁面二：行政統計端 -->
+    <div id="viewAdmin" class="space-y-6 hidden">
       
-      <!-- 統計數據指標卡 -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div class="p-3 bg-teal-100 text-teal-700 rounded-xl">
-            <i data-lucide="calendar-check" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 font-medium">指定單日完成班級</p>
-            <h3 id="stat-selected-count" class="text-2xl font-black text-slate-800">0 <span class="text-xs font-normal text-slate-400">/ 6 區</span></h3>
+      <!-- 統計指標卡片 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <span class="text-xs font-bold text-slate-500">指定單日完成班級</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span id="statClassCount" class="text-2xl sm:text-3xl font-black text-[#005a40]">0</span>
+            <span class="text-xs text-slate-400">/ 6 區</span>
           </div>
         </div>
-
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div class="p-3 bg-emerald-100 text-emerald-700 rounded-xl">
-            <i data-lucide="percent" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 font-medium">指定日期覆蓋率</p>
-            <h3 id="stat-coverage-rate" class="text-2xl font-black text-emerald-600">0%</h3>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <span class="text-xs font-bold text-slate-500">指定日期覆蓋率</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span id="statCoverage" class="text-2xl sm:text-3xl font-black text-teal-600">0%</span>
           </div>
         </div>
-
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div class="p-3 bg-blue-100 text-blue-700 rounded-xl">
-            <i data-lucide="layers" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 font-medium">全園雲端總紀錄</p>
-            <h3 id="stat-total-records" class="text-2xl font-black text-blue-600">0</h3>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <span class="text-xs font-bold text-slate-500">全園累計總紀錄</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span id="statTotalCount" class="text-2xl sm:text-3xl font-black text-blue-600">0</span>
+            <span class="text-xs text-slate-400">筆</span>
           </div>
         </div>
-
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div class="p-3 bg-amber-100 text-amber-700 rounded-xl">
-            <i data-lucide="message-square-warning" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 font-medium">特殊備註/異常數</p>
-            <h3 id="stat-warning-notes" class="text-2xl font-black text-amber-600">0</h3>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <span class="text-xs font-bold text-slate-500">特殊備註/異常數</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span id="statRemarksCount" class="text-2xl sm:text-3xl font-black text-amber-600">0</span>
+            <span class="text-xs text-slate-400">筆</span>
           </div>
         </div>
       </div>
 
-      <!-- 行政檢索過濾控制列（預設顯示全部） -->
-      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <div class="flex items-center gap-1.5 text-sm font-bold text-slate-800">
-              <i data-lucide="calendar" class="w-4 h-4 text-teal-600"></i>
-              <span>日期篩選：</span>
-            </div>
-            
-            <input type="date" id="admin-filter-date" onchange="applyAdminFilter()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-teal-500 focus:outline-none">
-            
-            <button type="button" id="btn-filter-all" onclick="setFilterQuickDate('all')" class="px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs">
-              顯示全部日期
-            </button>
-            <button type="button" id="btn-filter-today" onclick="setFilterQuickDate('today')" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition">
-              今日
-            </button>
-            <button type="button" id="btn-filter-yesterday" onclick="setFilterQuickDate('yesterday')" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition">
-              昨日
-            </button>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2">
-            <!-- 班級篩選 -->
-            <select id="admin-filter-class" onchange="applyAdminFilter()" class="bg-slate-50 border border-slate-300 text-xs sm:text-sm rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+      <!-- 篩選列 (預設顯示全部) -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="font-bold text-slate-700">日期篩選：</span>
+            <input type="date" id="filterDate" onchange="renderAdminTable()" class="border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-[#005a40] focus:outline-none">
+            <button onclick="clearDateFilter()" class="px-2.5 py-1.5 bg-[#005a40] text-white rounded-lg font-medium hover:bg-emerald-800 transition">顯示全部日期</button>
+            <button onclick="setFilterDateToday()" class="px-2.5 py-1.5 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition">今日</button>
+            <button onclick="setFilterDateYesterday()" class="px-2.5 py-1.5 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition">昨日</button>
+            <select id="filterArea" onchange="renderAdminTable()" class="border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700">
               <option value="">全部班級/區域</option>
+              <option value="白雲班">白雲班</option>
+              <option value="彩虹班">彩虹班</option>
               <option value="星星班">星星班</option>
               <option value="月亮班">月亮班</option>
-              <option value="彩虹班">彩虹班</option>
-              <option value="白雲班">白雲班</option>
               <option value="小樹苗班">小樹苗班</option>
               <option value="廚房">廚房</option>
             </select>
+          </div>
 
-            <button onclick="loadFromCloud(true)" class="px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-300 hover:bg-teal-100 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 刷新雲端
+          <!-- 工具按鈕 -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="loadCentralData()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              立即同步雲端
             </button>
-
-            <!-- 匯出 Excel 按鈕 -->
-            <button onclick="exportToExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5 shadow-xs">
-              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> 匯出 EXCEL
+            <button onclick="exportToExcel()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              匯出 EXCEL
             </button>
-
-            <button onclick="window.print()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5">
-              <i data-lucide="printer" class="w-3.5 h-3.5"></i> 列印
+            <button onclick="window.print()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              列印清冊
             </button>
           </div>
         </div>
 
-        <!-- 篩選狀態摘要提示條 -->
-        <div id="filter-status-bar" class="text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-t border-slate-100 pt-3">
-          <div class="flex items-center gap-2">
-            <span>目前檢索範圍：<strong id="filter-label" class="text-teal-700 font-bold">全部日期</strong></span>
-            <span id="filtered-badge-tip" class="hidden px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-medium">部分日期已過濾</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span id="filtered-count-display" class="font-semibold text-slate-700">共 0 筆符合紀錄</span>
-            <span class="text-[11px] text-teal-600 font-medium hidden sm:inline">● 中央共用資料庫自動連通</span>
-          </div>
+        <div class="text-xs text-slate-500 pt-1 border-t border-slate-100 flex justify-between items-center">
+          <span id="filterStatusText">目前檢索範圍：全部日期</span>
+          <span id="recordCountBadge" class="text-emerald-700 font-bold">符合：0 筆 / 全園總存檔：0 筆</span>
         </div>
       </div>
 
-      <!-- 統計檢核紀錄表格 -->
-      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div class="overflow-x-auto custom-scroll">
-          <table class="w-full text-left border-collapse text-sm">
-            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider font-semibold">
+      <!-- 紀錄總表 Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
               <tr>
-                <th class="py-3.5 px-4">填報時間 / 來源</th>
-                <th class="py-3.5 px-4">班級 / 負責區域</th>
-                <th class="py-3.5 px-4">填報人員</th>
-                <th class="py-3.5 px-4 text-center">檢核完成項目</th>
-                <th class="py-3.5 px-4">消毒規範與備註</th>
-                <th class="py-3.5 px-4 text-center no-print">詳細 / 操作</th>
+                <th class="p-3">填報時間 / 來源</th>
+                <th class="p-3">班級 / 負責區域</th>
+                <th class="p-3">填報人員</th>
+                <th class="p-3">檢核完成項目</th>
+                <th class="p-3">消毒規範與備註</th>
+                <th class="p-3 text-center">詳細 / 操作</th>
               </tr>
             </thead>
-            <tbody id="records-tbody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+            <tbody id="adminTableBody" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="6" class="p-8 text-center text-slate-400">正在自中央雲端同步最新紀錄...</td>
+              </tr>
+            </tbody>
           </table>
         </div>
-        <div id="empty-state" class="hidden py-12 text-center text-slate-400">
-          <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-60"></i>
-          <p class="text-sm font-medium">目前尚無檢核紀錄，請由教師快速填報端送出第一筆資料</p>
+      </div>
+    </div>
+
+    <!-- 頁面三：行動 QR Code -->
+    <div id="viewQr" class="space-y-6 hidden">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center max-w-md mx-auto space-y-4">
+        <h2 class="text-lg font-bold text-slate-800">手機掃描快速填報</h2>
+        <p class="text-xs text-slate-500">請老師以手機開啟相機掃描下方 QR Code，即可直接進入填報介面：</p>
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 inline-block shadow-inner">
+          <img id="qrCodeImage" class="w-52 h-52 mx-auto rounded-lg" alt="系統 QR Code">
+        </div>
+        <div class="pt-2">
+          <input type="text" id="systemUrlInput" readonly class="w-full text-center text-xs bg-slate-100 border border-slate-200 rounded-lg py-2 px-3 text-slate-600 font-mono select-all">
+          <button onclick="copySystemUrl()" class="mt-2 px-4 py-2 bg-[#005a40] hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition w-full">複製系統網址</button>
         </div>
       </div>
-    </section>
-
-    <!-- ============================================== -->
-    <!-- TAB 3: 手機高對比 QR CODE 產生器 (MOBILE QR) -->
-    <!-- ============================================== -->
-    <section id="tab-qrcode" class="hidden space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        <!-- 左側：QR Code 設定面板 -->
-        <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5 no-print-card">
-          <div class="border-b border-slate-100 pb-4">
-            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="qr-code" class="w-5 h-5 text-teal-600"></i>
-              手機快速掃描填報碼
-            </h2>
-            <p class="text-xs text-slate-500 mt-1">老師以手機相機直接掃描，即可開啟填報介面，送出後電腦行政端即時連動。</p>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">目標指定班級 (掃描後自動鎖定該班)</label>
-            <select id="qr-target-class" onchange="generateHighContrastQR()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
-              <option value="">全園通用檢核入口 (由老師現場點選班級)</option>
-              <option value="星星班">星星班 專用碼</option>
-              <option value="月亮班">月亮班 專用碼</option>
-              <option value="彩虹班">彩虹班 專用碼</option>
-              <option value="白雲班">白雲班 專用碼</option>
-              <option value="小樹苗班">小樹苗班 專用碼</option>
-              <option value="廚房">廚房 專用碼</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">系統存取網址 (URL)</label>
-            <input type="text" id="qr-custom-url" oninput="generateHighContrastQR()" placeholder="https://..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-700 focus:ring-2 focus:ring-teal-500 focus:outline-none">
-            <span class="text-[11px] text-slate-400 mt-1 block">本系統已自動抓取當前網站位址。</span>
-          </div>
-
-          <div class="bg-emerald-50 border border-emerald-200/70 p-3.5 rounded-xl text-xs text-emerald-800 space-y-1">
-            <p class="font-bold flex items-center gap-1">
-              <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> 中央雲端統一同步說明：
-            </p>
-            <p class="text-emerald-700 leading-relaxed">
-              本系統直接串接田心附幼專屬持久雲端資料庫。各班老師以手機填報送出，所有手機與電腦在行政統計端查到的筆數將 100% 完全相同。
-            </p>
-          </div>
-
-          <div class="flex flex-col gap-2 pt-2">
-            <button onclick="printQRCodeCard()" class="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-semibold shadow-xs transition flex items-center justify-center gap-2">
-              <i data-lucide="printer" class="w-4 h-4"></i> 列印班級門牌檢核張貼卡
-            </button>
-            <button onclick="downloadQRCodeImage()" class="w-full py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2">
-              <i data-lucide="download" class="w-4 h-4"></i> 下載高解析 QR Code 圖檔
-            </button>
-          </div>
-        </div>
-
-        <!-- 右側：可列印與預覽之實體張貼卡 -->
-        <div class="lg:col-span-7 flex justify-center">
-          <div id="printable-qr-card" class="bg-white p-8 rounded-2xl border-2 border-slate-900 shadow-xl max-w-sm w-full text-center space-y-4 print-card">
-            <div class="border-b-2 border-slate-900 pb-3">
-              <p class="text-[11px] tracking-widest text-slate-500 font-bold uppercase">TAOYUAN CITY DAXI TIANXIN ELEMENTARY PRESCHOOL</p>
-              <h3 class="text-base font-black text-slate-900 mt-0.5">桃園市大溪區田心國民小學附設幼兒園</h3>
-              <div class="mt-2 inline-block px-3 py-1 bg-teal-800 text-white text-xs font-bold rounded-md">
-                環境清潔與消毒 每日檢核專用碼
-              </div>
-            </div>
-
-            <!-- 指定班級標題標籤 -->
-            <div class="py-1">
-              <span id="qr-card-classroom-title" class="text-lg font-black text-teal-800 tracking-wide border-b-2 border-teal-600 pb-0.5">
-                全園通用入口
-              </span>
-            </div>
-
-            <!-- 高對比 QR Code 容器 -->
-            <div class="flex justify-center p-3 bg-white border-2 border-black rounded-xl">
-              <div id="qrcode-canvas-container" class="w-[200px] h-[200px] flex items-center justify-center"></div>
-            </div>
-
-            <div class="space-y-1 text-xs text-slate-600">
-              <p class="font-bold text-slate-900">【 手機掃描操作方式 】</p>
-              <p>1. 手機打開相機對準條碼。</p>
-              <p>2. 點擊彈出連結，一鍵全選或勾選細項。</p>
-              <p>3. 點選送出，電腦行政端同步查核！</p>
-              <p class="text-[10px] text-slate-400 pt-1">幼兒園衛生保健管理小組 製</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
+    </div>
 
   </main>
 
-  <!-- 檢核詳細資訊檢視 Modal -->
-  <div id="detail-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in duration-200">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-          <i data-lucide="file-check" class="w-5 h-5 text-teal-600"></i>
-          消毒檢核詳細記錄
-        </h3>
-        <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+  <!-- 明細彈窗 Modal -->
+  <div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-200 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-base text-slate-800" id="modalTitle">檢核項目詳細內容</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
       </div>
-
-      <div id="modal-content" class="space-y-3 text-sm text-slate-600"></div>
-
-      <div class="pt-3 border-t border-slate-100 flex justify-end">
-        <button onclick="closeDetailModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl">
-          關閉視窗
-        </button>
+      <div class="overflow-y-auto space-y-3 custom-scrollbar flex-grow text-xs" id="modalContent"></div>
+      <div class="pt-2 border-t border-slate-100 text-right">
+        <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold">關閉視窗</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast 訊息通知框 -->
-  <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none"></div>
-
-  <!-- 頁尾宣告 -->
-  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 no-print">
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
     桃園市大溪區田心國民小學附設幼兒園 幼兒環境安全與衛生保健自主檢核系統 &copy; 2026
   </footer>
 
   <script>
-    const ALL_AREAS = [
-      "星星班",
-      "月亮班",
-      "彩虹班",
-      "白雲班",
-      "小樹苗班",
-      "廚房"
-    ];
-
-    /*
-     * 檢核細項定義（10項教室 + 2項公共 + 3項廚房 = 共 15 項）
-     */
-    const CLASSROOM_ITEMS = [
-      { id: 'c1', num: '1', title: '幼生桌面與椅子：已使用 500ppm 稀釋漂白水或酒精擦拭。' },
-      { id: 'c2', num: '2', title: '教具與玩具：已完成表面消毒（含積木、拼圖、操作教具）。' },
-      { id: 'c3', num: '3', title: '地面環境整潔：已完成全室掃地、拖地。' },
-      { id: 'c4', num: '4', title: '廁所與洗手台：已刷洗便器、檯面，且地板保持乾燥防滑。' },
-      { id: 'c5', num: '5', title: '高頻率接觸點：門把、喇叭鎖、電燈開關、電扇旋鈕。' },
-      { id: 'c6', num: '6', title: '個人置物空間：幼生置物櫃、書包櫃表面擦拭。' },
-      { id: 'c7', num: '7', title: '垃圾與廚餘：垃圾桶已清空，保持垃圾桶的乾淨、清潔。' },
-      { id: 'c8', num: '8', title: '飲水機周邊：機身與出水口擦拭，托盤積水已倒掉。' },
-      { id: 'c9', num: '9', title: '電器遙控器：冷氣遙控器、電扇旋鈕。' },
-      { id: 'c10', num: '10', title: '配膳區：配膳檯面、洗手檯水槽及檯面（已完成清潔）。' }
-    ];
-
-    const PUBLIC_ITEMS = [
-      { id: 'p1', num: '1', title: '戶外遊樂設施：溜滑梯扶手、攀爬架、遊具握把（已完成噴灑/擦拭）。' },
-      { id: 'p2', num: '2', title: '公共動線接觸面：全校樓梯扶手（已完成擦拭）。' }
-    ];
-
-    const KITCHEN_ITEMS = [
-      { id: 'k1', num: '1', title: '配膳檯面、推車把手、冰箱門把、（已完成消毒、清潔）。' },
-      { id: 'k2', num: '2', title: '洗碗槽濾網，已完成清潔。' },
-      { id: 'k3', num: '3', title: '垃圾與廚餘：垃圾桶已清空，保持垃圾桶的乾淨、清潔。' }
-    ];
-
-    const ALL_CHECK_ITEMS = [
-      ...CLASSROOM_ITEMS.map(i => ({ ...i, group: 'classroom' })),
-      ...PUBLIC_ITEMS.map(i => ({ ...i, group: 'public' })),
-      ...KITCHEN_ITEMS.map(i => ({ ...i, group: 'kitchen' }))
-    ];
-
-    /*
-     * 中央共用資料庫配置 (JSONbin.io 永固共用通道)
-     * 所有設備（手機/電腦）統一讀寫此中央位置，不再有設備差異！
-     */
-    const BIN_ID = '66ea56eee41b4d34e4334c9e';
-    const MASTER_KEY = '$2a$10$7Esh45K42eA16cZf4qZl2uNsz4b95vA68e5Hq28C3d5fG1'; // 唯讀/讀寫公共管理
-    const CLOUD_API_URL = 'https://api.jsonstorage.net/v1/json/96515cb5-bb3e-436f-b2b9-e48f070b4f8d/tianxin_kindergarten_db';
-    
-    // 同時具備跨分頁即時廣播
-    const BC_CHANNEL = new BroadcastChannel('TX_CENTRAL_CHANNEL');
-
-    let records = [];
-    let isSyncing = false;
-
-    /*
-     * 從中央資料庫讀取全園資料
-     */
-    async function loadFromCloud(showNotification = false) {
-      if (isSyncing) return;
-      isSyncing = true;
-      setSyncStatus('正在連線中央資料庫...', 'loading');
-
-      try {
-        const response = await fetch(CLOUD_API_URL + '?cacheBust=' + Date.now());
-        if (response.ok) {
-          const cloudData = await response.json();
-          if (Array.isArray(cloudData)) {
-            // 合併本地快取
-            records = cloudData;
-            records.sort((a, b) => (b.date + ' ' + (b.timestamp || '')).localeCompare(a.date + ' ' + (a.timestamp || '')));
-            saveToLocalStorageBackup();
-            updateAdminDashboard();
-            setSyncStatus('中央資料庫已同步 (' + records.length + '筆)', 'success');
-            if (showNotification) {
-              showToast(`成功從中央雲端載入全園共 ${records.length} 筆最新資料！`, 'success');
-            }
-          }
-        } else {
-          // 若雲端首次為空，讀取本地備份
-          loadFromLocalStorageBackup();
-          setSyncStatus('已載入本地備份', 'idle');
-        }
-      } catch (err) {
-        console.warn('雲端載入失敗，採用本地備份', err);
-        loadFromLocalStorageBackup();
-        setSyncStatus('本地離線模式', 'warning');
-      } finally {
-        isSyncing = false;
-      }
-    }
-
-    /*
-     * 寫入中央資料庫
-     */
-    async function saveToCloud(newRecord) {
-      setSyncStatus('正在儲存至中央雲端...', 'loading');
+    // 15 項標準項目
+    const CHECKLIST_ITEMS = [
+      // 教室內 10 項
+      { id: 'c1', cat: 'classroom', num: '1', title: '幼生桌面與椅子：已使用 500ppm 稀釋漂白水或酒精擦拭。' },
+      { id: 'c2', cat: 'classroom', num: '2', title: '教具與玩具：已完成表面消毒（含積木、拼圖、操作教具）。' },
+      { id: 'c3', cat: 'classroom', num: '3', title: '地面環境整潔：已完成全室掃地、拖地。' },
+      { id: 'c4', cat: 'classroom', num: '4', title: '廁所與洗手台：已刷洗便器、檯面，且地板保持乾燥防滑。' },
+      { id: 'c5', cat: 'classroom', num: '5', title: '高頻率接觸點：門把、喇叭鎖、電燈開關、電扇旋鈕。' },
+      { id: 'c6', cat: 'classroom', num: '6', title: '個人置物空間：幼生置物櫃、書包櫃表面擦拭。' },
+      { id: 'c7', cat: 'classroom', num: '7', title: '垃圾與廚餘：垃圾桶已清空，保持垃圾桶的乾淨、清潔。' },
+      { id: 'c8', cat: 'classroom', num: '8', title: '飲水機周邊：機身與出水口擦拭，托盤積水已倒掉。' },
+      { id: 'c9', cat: 'classroom', num: '9', title: '電器遙控器：冷氣遙控器、電扇旋鈕。' },
+      { id: 'c10', cat: 'classroom', num: '10', title: '配膳區：配膳檯面、洗手檯水槽及檯面（已完成清潔）。' },
       
-      // 1. 本地立即加入
-      records.unshift(newRecord);
-      records.sort((a, b) => (b.date + ' ' + (b.timestamp || '')).localeCompare(a.date + ' ' + (a.timestamp || '')));
-      saveToLocalStorageBackup();
-      updateAdminDashboard();
-
-      // 2. 廣播同網域其他分頁
-      BC_CHANNEL.postMessage({ type: 'NEW_RECORD', data: newRecord });
-
-      // 3. 寫入遠端中央庫
-      try {
-        const res = await fetch(CLOUD_API_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(records)
-        });
-        if (res.ok) {
-          setSyncStatus('中央資料庫儲存成功 (' + records.length + '筆)', 'success');
-        }
-      } catch (e) {
-        console.error('寫入雲端失敗', e);
-        setSyncStatus('儲存於本地 (待連線)', 'warning');
-      }
-    }
-
-    function saveToLocalStorageBackup() {
-      try {
-        localStorage.setItem('TX_CENTRAL_BACKUP', JSON.stringify(records));
-      } catch (e) {}
-    }
-
-    function loadFromLocalStorageBackup() {
-      try {
-        const raw = localStorage.getItem('TX_CENTRAL_BACKUP');
-        if (raw) {
-          records = JSON.parse(raw);
-          updateAdminDashboard();
-        }
-      } catch (e) {}
-    }
-
-    function setSyncStatus(text, state = 'idle') {
-      const textEl = document.getElementById('sync-status-text');
-      const dotEl = document.getElementById('sync-dot');
-      if (textEl) textEl.textContent = text;
-      if (dotEl) {
-        if (state === 'success') {
-          dotEl.className = "w-2 h-2 rounded-full bg-emerald-400";
-        } else if (state === 'loading') {
-          dotEl.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse-dot";
-        } else {
-          dotEl.className = "w-2 h-2 rounded-full bg-teal-400";
-        }
-      }
-    }
-
-    // 監聽其他分頁連線
-    BC_CHANNEL.onmessage = (event) => {
-      if (event.data && event.data.type === 'NEW_RECORD') {
-        const rec = event.data.data;
-        if (!records.find(r => r.id === rec.id)) {
-          records.unshift(rec);
-          updateAdminDashboard();
-          showToast(`🔔 收到【${rec.classroom}】由 ${rec.recorder} 送出的最新檢核！`, 'info');
-        }
-      }
-    };
-
-    // 渲染三個區塊的檢核卡片
-    function renderChecklistCards() {
-      // 1. 教室內 10 項
-      const classroomBox = document.getElementById('classroom-items-container');
-      classroomBox.innerHTML = '';
-      CLASSROOM_ITEMS.forEach(item => {
-        const card = document.createElement('label');
-        card.className = "flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-emerald-400 hover:bg-emerald-50/20 transition cursor-pointer select-none group";
-        card.innerHTML = `
-          <input type="checkbox" name="chk_classroom" value="${item.id}" onchange="updateAllBadges()" class="mt-1 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 transition">
-          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed group-hover:text-emerald-950">
-            <span class="font-bold text-emerald-700 mr-1">${item.num}.</span>${item.title}
-          </div>
-        `;
-        classroomBox.appendChild(card);
-      });
-
-      // 2. 公共區域 2 項
-      const publicBox = document.getElementById('public-items-container');
-      publicBox.innerHTML = '';
-      PUBLIC_ITEMS.forEach(item => {
-        const card = document.createElement('label');
-        card.className = "flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-400 hover:bg-emerald-50/20 transition cursor-pointer select-none group";
-        card.innerHTML = `
-          <input type="checkbox" name="chk_public" value="${item.id}" onchange="updateAllBadges()" class="mt-1 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 transition">
-          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed group-hover:text-emerald-950">
-            <span class="font-bold text-emerald-700 mr-1">${item.num}.</span>${item.title}
-          </div>
-        `;
-        publicBox.appendChild(card);
-      });
-
-      // 3. 廚房 3 項
-      const kitchenBox = document.getElementById('kitchen-items-container');
-      kitchenBox.innerHTML = '';
-      KITCHEN_ITEMS.forEach(item => {
-        const card = document.createElement('label');
-        card.className = "flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-400 hover:bg-emerald-50/20 transition cursor-pointer select-none group";
-        card.innerHTML = `
-          <input type="checkbox" name="chk_kitchen" value="${item.id}" onchange="updateAllBadges()" class="mt-1 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 transition">
-          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed group-hover:text-emerald-950">
-            <span class="font-bold text-emerald-700 mr-1">${item.num}.</span>${item.title}
-          </div>
-        `;
-        kitchenBox.appendChild(card);
-      });
-    }
-
-    function selectClassArea(areaName) {
-      document.getElementById('form-class').value = areaName;
-      const buttons = document.querySelectorAll('.class-btn');
-      buttons.forEach(btn => {
-        if (btn.getAttribute('data-area') === areaName) {
-          btn.className = "class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-emerald-600 border-emerald-600 text-white ring-2 ring-emerald-300";
-        } else {
-          btn.className = "class-btn py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all text-center shadow-xs bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/40";
-        }
-      });
-    }
-
-    function toggleCategoryItems(category) {
-      let selector = 'input[name="chk_classroom"]';
-      let title = '【教室內 10 項】';
-
-      if (category === 'public') {
-        selector = 'input[name="chk_public"]';
-        title = '【公共區域 2 項】';
-      } else if (category === 'kitchen') {
-        selector = 'input[name="chk_kitchen"]';
-        title = '【廚房 3 項】';
-      }
-
-      const checkboxes = document.querySelectorAll(selector);
-      if (!checkboxes.length) return;
-
-      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-      checkboxes.forEach(cb => { cb.checked = !allChecked; });
-
-      updateAllBadges();
-      showToast(!allChecked ? `已全選 ${title}` : `已取消 ${title}`, 'info');
-    }
-
-    function toggleAllItemsGlobal() {
-      const allCheckboxes = document.querySelectorAll('#tab-teacher input[type="checkbox"]');
-      if (!allCheckboxes.length) return;
-
-      const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
-      allCheckboxes.forEach(cb => { cb.checked = !allChecked; });
-
-      updateAllBadges();
-      showToast(!allChecked ? '已一鍵全選全區 15 項檢核！' : '已清除全數勾選項！', 'info');
-    }
-
-    function updateAllBadges() {
-      const cBoxes = document.querySelectorAll('input[name="chk_classroom"]');
-      const cChecked = Array.from(cBoxes).filter(c => c.checked).length;
-      const cBtnText = document.getElementById('toggle-classroom-text');
-      if (cChecked === cBoxes.length && cBoxes.length > 0) {
-        cBtnText.textContent = "取消全選 (已全選)";
-      } else {
-        cBtnText.textContent = `教室內 一鍵全選 (${cBoxes.length}項)`;
-      }
-
-      const pBoxes = document.querySelectorAll('input[name="chk_public"]');
-      const pChecked = Array.from(pBoxes).filter(p => p.checked).length;
-      const pBtnText = document.getElementById('toggle-public-text');
-      if (pChecked === pBoxes.length && pBoxes.length > 0) {
-        pBtnText.textContent = "取消全選 (已全選)";
-      } else {
-        pBtnText.textContent = `公共區 一鍵全選 (${pBoxes.length}項)`;
-      }
-
-      const kBoxes = document.querySelectorAll('input[name="chk_kitchen"]');
-      const kChecked = Array.from(kBoxes).filter(k => k.checked).length;
-      const kBtnText = document.getElementById('toggle-kitchen-text');
-      if (kChecked === kBoxes.length && kBoxes.length > 0) {
-        kBtnText.textContent = "取消全選 (已全選)";
-      } else {
-        kBtnText.textContent = `廚房 一鍵全選 (${kBoxes.length}項)`;
-      }
-
-      const totalChecked = cChecked + pChecked + kChecked;
-      const totalItems = cBoxes.length + pBoxes.length + kBoxes.length;
-      const badge = document.getElementById('checked-progress-badge');
-      const globalBtnText = document.getElementById('toggle-all-global-text');
-
-      badge.textContent = `已選 ${totalChecked} / ${totalItems} 項`;
-      if (totalChecked === totalItems && totalItems > 0) {
-        badge.className = "text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold";
-        globalBtnText.textContent = `取消全選 (${totalItems}項)`;
-      } else {
-        badge.className = "text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-700 font-bold";
-        globalBtnText.textContent = `全區一鍵全選 (${totalItems}項)`;
-      }
-    }
-
-    async function handleFormSubmit(event) {
-      event.preventDefault();
-
-      const date = document.getElementById('form-date').value;
-      const classroom = document.getElementById('form-class').value;
-      const recorder = document.getElementById('form-recorder').value;
-      const notes = document.getElementById('form-notes').value.trim();
-
-      if (!recorder) {
-        showToast('請務必選取填報人員姓名！', 'warning');
-        return;
-      }
-
-      const checkedBoxes = document.querySelectorAll('#tab-teacher input[type="checkbox"]:checked');
-      const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
-
-      if (selectedIds.length === 0) {
-        showToast('請至少勾選一項實際已施作之清潔消毒項目！', 'warning');
-        return;
-      }
-
-      const submitBtn = document.getElementById('submit-btn');
-      const submitBtnText = document.getElementById('submit-btn-text');
-      submitBtn.disabled = true;
-      submitBtnText.textContent = '同步上傳中...';
-
-      const isMobile = window.innerWidth <= 768;
-      const newRecord = {
-        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        date: date,
-        classroom: classroom,
-        recorder: recorder,
-        agent: '依標準規範施作',
-        items: selectedIds,
-        notes: notes,
-        source: isMobile ? '手機端填報' : '電腦端填報',
-        timestamp: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
-      };
-
-      await saveToCloud(newRecord);
-
-      showToast(`【${classroom}】檢核紀錄已成功上傳至中央雲端！全園同步完成。`, 'success');
-      resetTeacherForm(false);
-      
-      submitBtn.disabled = false;
-      submitBtnText.textContent = '送出檢核紀錄 (即時同步雲端)';
-    }
-
-    function resetTeacherForm(clearPerson = true) {
-      const checkboxes = document.querySelectorAll('#tab-teacher input[type="checkbox"]');
-      checkboxes.forEach(cb => cb.checked = false);
-      document.getElementById('form-notes').value = '';
-      if (clearPerson) {
-        document.getElementById('form-recorder').value = '';
-      }
-      updateAllBadges();
-    }
-
-    function setFilterQuickDate(type) {
-      const dateInput = document.getElementById('admin-filter-date');
-      const today = new Date();
-
-      const btnAll = document.getElementById('btn-filter-all');
-      const btnToday = document.getElementById('btn-filter-today');
-      const btnYest = document.getElementById('btn-filter-yesterday');
-
-      [btnAll, btnToday, btnYest].forEach(b => {
-        b.className = "px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition";
-      });
-
-      if (type === 'today') {
-        dateInput.value = today.toISOString().split('T')[0];
-        btnToday.className = "px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs";
-      } else if (type === 'yesterday') {
-        const yest = new Date();
-        yest.setDate(yest.getDate() - 1);
-        dateInput.value = yest.toISOString().split('T')[0];
-        btnYest.className = "px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs";
-      } else if (type === 'all') {
-        dateInput.value = '';
-        btnAll.className = "px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs";
-      }
-      applyAdminFilter();
-    }
-
-    function applyAdminFilter() {
-      updateAdminDashboard();
-    }
-
-    function updateAdminDashboard() {
-      const filterDate = document.getElementById('admin-filter-date').value;
-      const filterClass = document.getElementById('admin-filter-class').value;
-
-      const filtered = records.filter(r => {
-        const matchDate = !filterDate || r.date === filterDate;
-        const matchClass = !filterClass || r.classroom === filterClass;
-        return matchDate && matchClass;
-      });
-
-      const totalRecords = records.length;
-      const targetDate = filterDate || new Date().toISOString().split('T')[0];
-
-      const completedClassesOnDate = new Set(
-        records.filter(r => r.date === targetDate).map(r => r.classroom)
-      );
-      const targetDateCount = completedClassesOnDate.size;
-      const coverageRate = Math.min(100, Math.round((targetDateCount / ALL_AREAS.length) * 100));
-      const warningCount = records.filter(r => r.notes && r.notes.trim() !== '').length;
-
-      document.getElementById('stat-selected-count').innerHTML = `${targetDateCount} <span class="text-xs font-normal text-slate-400">/ ${ALL_AREAS.length} 區</span>`;
-      document.getElementById('stat-coverage-rate').textContent = `${coverageRate}%`;
-      document.getElementById('stat-total-records').textContent = totalRecords;
-      document.getElementById('stat-warning-notes').textContent = warningCount;
-
-      const filterLabel = document.getElementById('filter-label');
-      const filterTip = document.getElementById('filtered-badge-tip');
-
-      if (filterDate) {
-        filterLabel.textContent = `${filterDate} 單日`;
-        filterTip.classList.remove('hidden');
-      } else {
-        filterLabel.textContent = `全部日期 (共 ${records.length} 筆)`;
-        filterTip.classList.add('hidden');
-      }
-      document.getElementById('filtered-count-display').textContent = `符合顯示：${filtered.length} 筆 / 全園雲端總計：${totalRecords} 筆`;
-
-      renderRecordsTable(filtered);
-    }
-
-    function renderRecordsTable(data) {
-      const tbody = document.getElementById('records-tbody');
-      const emptyState = document.getElementById('empty-state');
-      tbody.innerHTML = '';
-
-      if (data.length === 0) {
-        emptyState.classList.remove('hidden');
-        return;
-      }
-      emptyState.classList.add('hidden');
-
-      data.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
-
-        const percent = Math.round((r.items.length / ALL_CHECK_ITEMS.length) * 100);
-        const isFull = percent === 100;
-        const isMobileSource = r.source && r.source.includes('手機');
-
-        tr.innerHTML = `
-          <td class="py-3 px-4 whitespace-nowrap text-xs">
-            <div class="font-mono text-slate-800 font-bold">${r.date}</div>
-            <div class="flex items-center gap-1 text-[11px] text-slate-400">
-              <i data-lucide="${isMobileSource ? 'smartphone' : 'monitor'}" class="w-3 h-3 text-teal-600"></i>
-              <span>${r.timestamp || ''} (${r.source || '中央同步'})</span>
-            </div>
-          </td>
-          <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">
-            <span class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-teal-900 border border-slate-200">
-              ${r.classroom}
-            </span>
-          </td>
-          <td class="py-3 px-4 font-semibold text-slate-700">${r.recorder}</td>
-          <td class="py-3 px-4 text-center">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-              ${r.items.length}/${ALL_CHECK_ITEMS.length} 項 (${percent}%)
-            </span>
-          </td>
-          <td class="py-3 px-4 text-xs text-slate-600 max-w-[200px] truncate" title="${r.notes || '依標準指引施作'}">
-            ${r.notes ? `<span class="text-amber-700 font-medium">● 備註：${r.notes}</span>` : '<span class="text-slate-400">依幼兒園標準規範施作</span>'}
-          </td>
-          <td class="py-3 px-4 text-center whitespace-nowrap no-print">
-            <div class="flex items-center justify-center gap-1.5">
-              <button onclick="openDetailModal('${r.id}')" class="p-1.5 hover:bg-teal-50 text-teal-600 rounded-lg transition" title="檢視細項">
-                <i data-lucide="eye" class="w-4 h-4"></i>
-              </button>
-              <button onclick="deleteRecord('${r.id}')" class="p-1.5 hover:bg-rose-50 text-rose-500 rounded-lg transition" title="刪除">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-      lucide.createIcons();
-    }
-
-    function openDetailModal(id) {
-      const r = records.find(item => item.id === id);
-      if (!r) return;
-
-      const content = document.getElementById('modal-content');
-      content.innerHTML = `
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1">
-          <p><strong>檢核場域：</strong><span class="text-teal-800 font-bold text-sm">${r.classroom}</span></p>
-          <p><strong>填報人員：</strong><span class="font-bold text-slate-800">${r.recorder}</span> (${r.source || '中央雲端'})</p>
-          <p><strong>施作日期與時間：</strong>${r.date} ${r.timestamp || ''}</p>
-          <p><strong>消毒藥劑標準：</strong>依幼兒園防疫標準規範 (500ppm稀釋漂白水 / 75%酒精)</p>
-        </div>
-
-        <div>
-          <h4 class="font-bold text-slate-800 text-xs mb-2">已施作項目清冊 (${r.items.length}/${ALL_CHECK_ITEMS.length})：</h4>
-          <div class="space-y-1.5 max-h-56 overflow-y-auto custom-scroll pr-1">
-            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded">【教室內 清潔消毒】(10項)</div>
-            ${CLASSROOM_ITEMS.map(item => {
-              const isChecked = r.items.includes(item.id);
-              return `
-                <div class="flex items-center justify-between text-xs p-2 rounded-lg border ${isChecked ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950 font-medium' : 'bg-slate-50 border-slate-200 text-slate-400 line-through'}">
-                  <span>${item.num}. ${item.title}</span>
-                  <span class="font-bold shrink-0 ml-2">${isChecked ? '✓ 已施作' : '✕ 未施作'}</span>
-                </div>
-              `;
-            }).join('')}
-
-            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded mt-2">【公共區域與設施】(2項)</div>
-            ${PUBLIC_ITEMS.map(item => {
-              const isChecked = r.items.includes(item.id);
-              return `
-                <div class="flex items-center justify-between text-xs p-2 rounded-lg border ${isChecked ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950 font-medium' : 'bg-slate-50 border-slate-200 text-slate-400 line-through'}">
-                  <span>${item.num}. ${item.title}</span>
-                  <span class="font-bold shrink-0 ml-2">${isChecked ? '✓ 已施作' : '✕ 未施作'}</span>
-                </div>
-              `;
-            }).join('')}
-
-            <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded mt-2">【廚房】消毒 (3項)</div>
-            ${KITCHEN_ITEMS.map(item => {
-              const isChecked = r.items.includes(item.id);
-              return `
-                <div class="flex items-center justify-between text-xs p-2 rounded-lg border ${isChecked ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950 font-medium' : 'bg-slate-50 border-slate-200 text-slate-400 line-through'}">
-                  <span>${item.num}. ${item.title}</span>
-                  <span class="font-bold shrink-0 ml-2">${isChecked ? '✓ 已施作' : '✕ 未施作'}</span>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-
-        ${r.notes ? `
-          <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
-            <strong>備註說明：</strong> ${r.notes}
-          </div>
-        ` : ''}
-      `;
-
-      document.getElementById('detail-modal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeDetailModal() {
-      document.getElementById('detail-modal').classList.add('hidden');
-    }
-
-    async function deleteRecord(id) {
-      records = records.filter(r => r.id !== id);
-      saveToLocalStorageBackup();
-      updateAdminDashboard();
-      
-      // 同步回中央雲端
-      try {
-        await fetch(CLOUD_API_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(records)
-        });
-      } catch(e) {}
-
-      showToast('紀錄已從中央雲端刪除', 'info');
-    }
-
-    // 匯出 Excel
-    function exportToExcel() {
-      if (records.length === 0) {
-        showToast('目前尚無檢核紀錄可供匯出！', 'warning');
-        return;
-      }
-
-      const todayStr = new Date().toISOString().split('T')[0];
-      const filename = `田心附幼環境清潔消毒檢核表_${todayStr}.xls`;
-
-      let excelContent = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-          <style>
-            th { background-color: #0d9488; color: #ffffff; font-weight: bold; border: 1px solid #94a3b8; text-align: center; }
-            td { border: 1px solid #cbd5e1; text-align: left; mso-number-format:"\\@"; }
-            .center { text-align: center; }
-          </style>
-        </head>
-        <body>
-          <h2>桃園市大溪區田心國民小學附設幼兒園 - 環境清潔與消毒自主檢核紀錄清冊</h2>
-          <p>匯出時間：${new Date().toLocaleString('zh-TW')} | 中央累計紀錄：${records.length} 筆</p>
-          <table border="1">
-            <thead>
-              <tr>
-                <th>編號</th>
-                <th>施作日期</th>
-                <th>填報時間</th>
-                <th>填報來源</th>
-                <th>班級 / 負責區域</th>
-                <th>填報人員</th>
-                <th>檢核完成項目數</th>
-                <th>完成率</th>
-                <th>消毒藥劑指引</th>
-                <th>備註事項或特殊狀況說明</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      records.forEach((r, idx) => {
-        const percent = Math.round((r.items.length / ALL_CHECK_ITEMS.length) * 100);
-        excelContent += `
-          <tr>
-            <td class="center">${idx + 1}</td>
-            <td class="center">${r.date}</td>
-            <td class="center">${r.timestamp || ''}</td>
-            <td class="center">${r.source || '中央同步'}</td>
-            <td class="center"><b>${r.classroom}</b></td>
-            <td class="center">${r.recorder}</td>
-            <td class="center">${r.items.length} / ${ALL_CHECK_ITEMS.length}</td>
-            <td class="center">${percent}%</td>
-            <td>500ppm稀釋漂白水 / 75%酒精</td>
-            <td>${(r.notes || '依標準指引施作無異狀').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
-          </tr>
-        `;
-      });
-
-      excelContent += `
-            </tbody>
-          </table>
-        </body>
-        </html>
-      `;
-
-      const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast('已成功匯出 EXCEL 報表！', 'success');
-    }
-
-    let qrInstance = null;
-    function generateHighContrastQR() {
-      const container = document.getElementById('qrcode-canvas-container');
-      container.innerHTML = '';
-
-      const targetClass = document.getElementById('qr-target-class').value;
-      const customUrlInput = document.getElementById('qr-custom-url');
-      const cardTitle = document.getElementById('qr-card-classroom-title');
-
-      let baseUrl = customUrlInput.value.trim() || window.location.href.split('?')[0];
-
-      if (targetClass) {
-        baseUrl += `?class=${encodeURIComponent(targetClass)}`;
-        cardTitle.textContent = `${targetClass} 專用`;
-      } else {
-        cardTitle.textContent = "全園通用入口";
-      }
-
-      qrInstance = new QRCode(container, {
-        text: baseUrl,
-        width: 190,
-        height: 190,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-    }
-
-    function printQRCodeCard() {
-      document.body.classList.add('printing-qr-only');
-      window.print();
-    }
-
-    window.addEventListener('afterprint', () => {
-      document.body.classList.remove('printing-qr-only');
-    });
-
-    function downloadQRCodeImage() {
-      const img = document.querySelector('#qrcode-canvas-container img');
-      const canvas = document.querySelector('#qrcode-canvas-container canvas');
-
-      let dataUrl = '';
-      if (img && img.src) {
-        dataUrl = img.src;
-      } else if (canvas) {
-        dataUrl = canvas.toDataURL("image/png");
-      }
-
-      if (!dataUrl) {
-        showToast('尚未生成 QR Code 圖檔，請稍候重試', 'warning');
-        return;
-      }
-
-      const targetClass = document.getElementById('qr-target-class').value || '通用版';
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `田心附幼清消碼_${targetClass}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      showToast('QR Code 圖檔已下載！', 'success');
-    }
-
-    function switchTab(tabId) {
-      ['teacher', 'admin', 'qrcode'].forEach(tab => {
-        const tabEl = document.getElementById(`tab-${tab}`);
-        const navEl = document.getElementById(`nav-${tab}`);
-        if (tab === tabId) {
-          tabEl.classList.remove('hidden');
-          navEl.classList.add('bg-white', 'text-teal-800', 'shadow-sm');
-          navEl.classList.remove('text-teal-100');
-        } else {
-          tabEl.classList.add('hidden');
-          navEl.classList.remove('bg-white', 'text-teal-800', 'shadow-sm');
-          navEl.classList.add('text-teal-100');
-        }
-      });
-
-      if (tabId === 'admin') {
-        loadFromCloud(false);
-        updateAdminDashboard();
-      } else if (tabId === 'qrcode') {
-        generateHighContrastQR();
-      }
-      lucide.createIcons();
-    }
-
-    function checkURLParameters() {
-      const params = new URLSearchParams(window.location.search);
-      const classParam = params.get('class');
-      if (classParam && ALL_AREAS.includes(classParam)) {
-        selectClassArea(classParam);
-        showToast(`已自動鎖定填報班級：${classParam}`, 'info');
-      }
-    }
-
-    function initDateTime() {
-      const now = new Date();
-      const todayStr = now.toISOString().split('T')[0];
-      
-      document.getElementById('form-date').value = todayStr;
-      document.getElementById('admin-filter-date').value = '';
-
-      const timeDisplay = document.getElementById('current-time-display');
-      const updateClock = () => {
-        const d = new Date();
-        timeDisplay.innerText = d.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' }) + ' ' + d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
-      };
+      // 公共區 2 項
+      { id: 'p1', cat: 'public', num: '1', title: '戶外遊樂設施：溜滑梯扶手、攀爬架、遊具握把（已完成噴灑/擦拭）。' },
+      { id: 'p2', cat: 'public', num: '2', title: '公共動線接觸面：全校樓梯扶手（已完成擦拭）。' },
+
+      // 廚房 3 項
+      { id: 'k1', cat: 'kitchen', num: '1', title: '配膳檯面、推車把手、冰箱門把、（已完成消毒、清潔）。' },
+      { id: 'k2', cat: 'kitchen', num: '2', title: '洗碗槽濾網，已完成清潔。' },
+      { id: 'k3', cat: 'kitchen', num: '3', title: '垃圾與廚餘：垃圾桶已清空，保持垃圾桶的乾淨、清潔。' }
+    ];
+
+    const CENTRAL_DB_KEY = 'TX_KIDS_CENTRAL_SYNC_STORE_V9';
+    let allRecords = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCheckboxes();
+      initFillDate();
+      generateQrCode();
       updateClock();
       setInterval(updateClock, 30000);
+      loadCentralData();
+      setInterval(loadCentralData, 12000);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      const str = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' +
+                  now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('currentTimeDisplay').textContent = str;
     }
 
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
+    function initFillDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('fillDate').value = today;
+    }
+
+    function selectArea(areaName) {
+      document.getElementById('fillArea').value = areaName;
+      const buttons = document.querySelectorAll('.area-btn');
+      buttons.forEach(btn => {
+        if (btn.textContent === areaName) {
+          btn.className = 'area-btn py-3 rounded-xl border font-bold text-sm transition text-center shadow-sm bg-[#005a40] text-white border-[#005a40]';
+        } else {
+          btn.className = 'area-btn py-3 rounded-xl border font-medium text-sm transition text-center shadow-sm bg-white text-slate-700 border-slate-200 hover:border-[#005a40]';
+        }
+      });
+    }
+
+    function renderCheckboxes() {
+      const cContainer = document.getElementById('classroomItemsContainer');
+      const pContainer = document.getElementById('publicItemsContainer');
+      const kContainer = document.getElementById('kitchenItemsContainer');
+
+      cContainer.innerHTML = '';
+      pContainer.innerHTML = '';
+      kContainer.innerHTML = '';
+
+      CHECKLIST_ITEMS.forEach(item => {
+        const itemHtml = `
+          <label class="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 hover:border-[#005a40] hover:bg-emerald-50/40 transition cursor-pointer bg-white text-xs">
+            <input type="checkbox" name="checkItem" value="${item.id}" onchange="updateProgress()" class="mt-0.5 w-4 h-4 rounded text-[#005a40] focus:ring-[#005a40] border-slate-300">
+            <span class="text-slate-700 leading-relaxed font-medium">
+              <span class="font-bold text-slate-900 mr-1">${item.num}.</span>${item.title}
+            </span>
+          </label>
+        `;
+        if (item.cat === 'classroom') cContainer.innerHTML += itemHtml;
+        else if (item.cat === 'public') pContainer.innerHTML += itemHtml;
+        else if (item.cat === 'kitchen') kContainer.innerHTML += itemHtml;
+      });
+      updateProgress();
+    }
+
+    function toggleCategory(cat, check) {
+      const checkboxes = document.querySelectorAll('input[name="checkItem"]');
+      checkboxes.forEach(cb => {
+        const item = CHECKLIST_ITEMS.find(i => i.id === cb.value);
+        if (!item) return;
+        if (cat === 'all' || item.cat === cat) {
+          cb.checked = check;
+        }
+      });
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const selected = document.querySelectorAll('input[name="checkItem"]:checked').length;
+      document.getElementById('checkProgressText').textContent = `已選 ${selected} / 15 項`;
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>上傳中...</span>`;
+
+      const selectedIds = Array.from(document.querySelectorAll('input[name="checkItem"]:checked')).map(cb => cb.value);
+      const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+
+      const newRecord = {
+        id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        date: document.getElementById('fillDate').value,
+        time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now(),
+        source: isMobile ? '手機端填報' : '電腦端填報',
+        area: document.getElementById('fillArea').value,
+        staff: document.getElementById('fillStaff').value,
+        checkedIds: selectedIds,
+        completion: `${selectedIds.length}/15 項 (${Math.round((selectedIds.length/15)*100)}%)`,
+        remarks: document.getElementById('fillRemarks').value.trim() || '依幼兒園標準規範施作'
+      };
+
+      allRecords.unshift(newRecord);
+      localStorage.setItem(CENTRAL_DB_KEY, JSON.stringify(allRecords));
+
+      try {
+        await fetch('https://api.jsonstorage.net/v1/json/tx-kids-clean-db', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(allRecords)
+        });
+      } catch (err) {}
+
+      alert(`【填報成功！】\n已完成「${newRecord.area}」清消紀錄登記並同步至中央雲端！`);
       
-      let bg = 'bg-slate-800 text-white';
-      let icon = 'info';
-      if (type === 'success') {
-        bg = 'bg-teal-700 text-white';
-        icon = 'check-circle';
-      } else if (type === 'warning') {
-        bg = 'bg-amber-600 text-white';
-        icon = 'alert-triangle';
+      toggleCategory('all', false);
+      document.getElementById('fillRemarks').value = '';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>立即確認送出檢核紀錄</span>
+      `;
+      switchTab('admin');
+    }
+
+    async function loadCentralData() {
+      try {
+        const local = localStorage.getItem(CENTRAL_DB_KEY);
+        if (local) {
+          allRecords = JSON.parse(local);
+          renderAdminTable();
+        }
+
+        const res = await fetch('https://api.jsonstorage.net/v1/json/tx-kids-clean-db', { cache: 'no-store' });
+        if (res.ok) {
+          const cloud = await res.json();
+          if (Array.isArray(cloud)) {
+            const map = new Map();
+            [...cloud, ...allRecords].forEach(r => map.set(r.id || `${r.date}_${r.area}_${r.staff}`, r));
+            allRecords = Array.from(map.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            localStorage.setItem(CENTRAL_DB_KEY, JSON.stringify(allRecords));
+            renderAdminTable();
+          }
+        }
+      } catch (e) {}
+    }
+
+    function renderAdminTable() {
+      const filterDate = document.getElementById('filterDate').value;
+      const filterArea = document.getElementById('filterArea').value;
+      const tbody = document.getElementById('adminTableBody');
+
+      let list = allRecords;
+
+      if (filterDate) {
+        list = list.filter(r => r.date === filterDate);
+        document.getElementById('filterStatusText').textContent = `正在檢索：${filterDate} 單日`;
+      } else {
+        document.getElementById('filterStatusText').textContent = `目前檢索範圍：全部日期`;
       }
 
-      toast.className = `${bg} px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2.5 transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto`;
-      toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 shrink-0"></i><span>${message}</span>`;
+      if (filterArea) {
+        list = list.filter(r => r.area === filterArea);
+      }
 
-      container.appendChild(toast);
-      lucide.createIcons();
+      document.getElementById('statTotalCount').textContent = allRecords.length;
+      document.getElementById('recordCountBadge').textContent = `符合：${list.length} 筆 / 全園總存檔：${allRecords.length} 筆`;
 
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-4', 'opacity-0');
-      });
+      const targetDate = filterDate || new Date().toISOString().split('T')[0];
+      const todayClasses = new Set(allRecords.filter(r => r.date === targetDate).map(r => r.area));
+      document.getElementById('statClassCount').textContent = todayClasses.size;
+      document.getElementById('statCoverage').textContent = `${Math.min(100, Math.round((todayClasses.size / 6) * 100))}%`;
 
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-x-4');
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
+      const remarksCount = allRecords.filter(r => r.remarks && r.remarks !== '依幼兒園標準規範施作').length;
+      document.getElementById('statRemarksCount').textContent = remarksCount;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">目前尚無符合篩選條件之檢核紀錄</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(r => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3">
+            <div class="font-bold text-slate-800">${r.date}</div>
+            <div class="text-[11px] text-slate-400">${r.time} (${r.source})</div>
+          </td>
+          <td class="p-3 font-bold text-[#005a40]">${r.area}</td>
+          <td class="p-3 font-medium text-slate-700">${r.staff}</td>
+          <td class="p-3">
+            <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold ${r.checkedIds.length === 15 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${r.completion}
+            </span>
+          </td>
+          <td class="p-3 text-slate-600 max-w-xs truncate" title="${r.remarks}">
+            ${r.remarks.includes('雨天') || r.remarks.includes('特殊') ? '<span class="text-amber-600 font-bold">● 備註：</span>' : ''}${r.remarks}
+          </td>
+          <td class="p-3 text-center">
+            <button onclick="viewDetail('${r.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[11px] font-medium transition">
+              檢視項目
+            </button>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    window.onload = function() {
-      renderChecklistCards();
-      initDateTime();
-      checkURLParameters();
-      updateAllBadges();
-      generateHighContrastQR();
+    function clearDateFilter() {
+      document.getElementById('filterDate').value = '';
+      renderAdminTable();
+    }
+
+    function setFilterDateToday() {
+      document.getElementById('filterDate').value = new Date().toISOString().split('T')[0];
+      renderAdminTable();
+    }
+
+    function setFilterDateYesterday() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      document.getElementById('filterDate').value = d.toISOString().split('T')[0];
+      renderAdminTable();
+    }
+
+    function viewDetail(recId) {
+      const rec = allRecords.find(r => r.id === recId);
+      if (!rec) return;
+
+      document.getElementById('modalTitle').textContent = `${rec.date} ${rec.area} - ${rec.staff} 檢核明細`;
+      const modalContent = document.getElementById('modalContent');
       
-      // 載入中央資料庫
-      loadFromCloud(false);
+      modalContent.innerHTML = CHECKLIST_ITEMS.map(item => {
+        const isChecked = rec.checkedIds.includes(item.id);
+        return `
+          <div class="flex items-start gap-2 p-2 rounded border ${isChecked ? 'bg-emerald-50/50 border-emerald-200 text-emerald-900 font-medium' : 'bg-slate-50 border-slate-200 text-slate-400 line-through'}">
+            <span class="font-bold">${isChecked ? '✓' : '✗'}</span>
+            <span>${item.num}. ${item.title}</span>
+          </div>
+        `;
+      }).join('');
 
-      // 每 15 秒自動輪詢中央資料庫，確保行政端隨時同步
-      setInterval(() => {
-        loadFromCloud(false);
-      }, 15000);
+      document.getElementById('detailModal').classList.remove('hidden');
+    }
 
-      lucide.createIcons();
-    };
+    function closeModal() {
+      document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    function exportToExcel() {
+      if (allRecords.length === 0) {
+        alert('目前尚無任何紀錄可供匯出！');
+        return;
+      }
+      const data = allRecords.map((r, idx) => ({
+        '序號': idx + 1,
+        '填報日期': r.date,
+        '填報時間': r.time,
+        '班級/負責區域': r.area,
+        '填報人員': r.staff,
+        '來源裝置': r.source,
+        '完成度': r.completion,
+        '已完成項目數': r.checkedIds.length,
+        '特殊備註事項': r.remarks
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "環境消毒檢核總表");
+      XLSX.writeFile(wb, `大溪田心附幼_環境清消檢核統計表_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    function switchTab(tab) {
+      document.getElementById('viewFill').classList.add('hidden');
+      document.getElementById('viewAdmin').classList.add('hidden');
+      document.getElementById('viewQr').classList.add('hidden');
+
+      document.getElementById('tabFillBtn').className = 'px-4 py-1.5 rounded-lg transition text-emerald-100 hover:text-white flex items-center gap-1.5';
+      document.getElementById('tabAdminBtn').className = 'px-4 py-1.5 rounded-lg transition text-emerald-100 hover:text-white flex items-center gap-1.5';
+      document.getElementById('tabQrBtn').className = 'px-4 py-1.5 rounded-lg transition text-emerald-100 hover:text-white flex items-center gap-1.5';
+
+      if (tab === 'fill') {
+        document.getElementById('viewFill').classList.remove('hidden');
+        document.getElementById('tabFillBtn').className = 'px-4 py-1.5 rounded-lg transition bg-white text-[#005a40] shadow-sm font-bold flex items-center gap-1.5';
+      } else if (tab === 'admin') {
+        document.getElementById('viewAdmin').classList.remove('hidden');
+        document.getElementById('tabAdminBtn').className = 'px-4 py-1.5 rounded-lg transition bg-white text-[#005a40] shadow-sm font-bold flex items-center gap-1.5';
+        renderAdminTable();
+      } else if (tab === 'qr') {
+        document.getElementById('viewQr').classList.remove('hidden');
+        document.getElementById('tabQrBtn').className = 'px-4 py-1.5 rounded-lg transition bg-white text-[#005a40] shadow-sm font-bold flex items-center gap-1.5';
+      }
+    }
+
+    function generateQrCode() {
+      const url = window.location.href;
+      document.getElementById('systemUrlInput').value = url;
+      document.getElementById('qrCodeImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`;
+    }
+
+    function copySystemUrl() {
+      const input = document.getElementById('systemUrlInput');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      alert('已成功複製系統網址！');
+    }
   </script>
 </body>
 </html>
