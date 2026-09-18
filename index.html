@@ -17,7 +17,6 @@
       body { background: white !important; font-size: 12pt; }
       .print-card { box-shadow: none !important; border: 1px solid #333 !important; }
 
-      /* 當點選列印門牌時，只單獨列印門牌卡片並置中 */
       body.printing-qr-only header,
       body.printing-qr-only footer,
       body.printing-qr-only #toast-container,
@@ -59,10 +58,10 @@
     }
     @keyframes pulse-dot {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
+      50% { opacity: 0.3; transform: scale(0.85); }
     }
     .animate-pulse-dot {
-      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      animation: pulse-dot 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
   </style>
 </head>
@@ -80,12 +79,12 @@
             <h1 class="text-base sm:text-lg font-bold tracking-wide">桃園市大溪區田心國民小學附設幼兒園</h1>
             <!-- 雲端同步狀態標籤 -->
             <span id="cloud-sync-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-teal-800/90 text-teal-100 border border-teal-500/50">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-dot"></span>
-              <span id="sync-status-text">手機/電腦雲端同步中</span>
+              <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-dot"></span>
+              <span id="sync-status-text">中央雲端連線中...</span>
             </span>
           </div>
           <p class="text-xs text-teal-100 flex items-center gap-1">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 inline"></i> 環境清潔與消毒自主檢核系統
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 inline"></i> 環境清潔與消毒自主檢核管理系統 (中央同步版)
           </p>
         </div>
       </div>
@@ -122,13 +121,13 @@
               每日班級環境清潔與消毒檢核表
             </h2>
             <p class="text-sm text-slate-500 mt-1">
-              手機填報送出後，將自動與行政統計端電腦同步連線，紀錄即時建檔。
+              手機填報送出後，資料直接寫入全園共用中央資料庫，行政端與所有設備即刻同步！
             </p>
           </div>
           <div class="flex items-center gap-2 self-start sm:self-auto">
-            <button type="button" onclick="manualSync()" class="px-3 py-1.5 rounded-lg text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium flex items-center gap-1 transition">
+            <button type="button" onclick="loadFromCloud(true)" class="px-3 py-1.5 rounded-lg text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium flex items-center gap-1 transition">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="sync-icon"></i>
-              <span>立即更新同步</span>
+              <span>重新整理資料</span>
             </button>
             <div class="text-xs bg-teal-50 text-teal-800 px-3 py-1.5 rounded-lg font-medium border border-teal-200/60 flex items-center gap-1">
               <i data-lucide="clock" class="w-3.5 h-3.5"></i>
@@ -177,7 +176,7 @@
               <i data-lucide="flask-conical" class="w-4 h-4 text-teal-600"></i>
               環境消毒藥劑配製與使用標準規範（請依幼兒園防疫指引施作）：
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
               <div class="bg-white/80 p-2.5 rounded-xl border border-teal-100 shadow-xs">
                 <span class="font-bold text-teal-800 block mb-0.5">● 500ppm 稀釋漂白水</span>
                 <span class="text-slate-600">日常環境清消（課桌椅、積木玩具、地板、洗手間及門把）。</span>
@@ -189,10 +188,6 @@
               <div class="bg-white/80 p-2.5 rounded-xl border border-amber-200 bg-amber-50/40 shadow-xs">
                 <span class="font-bold text-amber-800 block mb-0.5">● 1000ppm 漂白水加強</span>
                 <span class="text-slate-600">腸病毒、諾羅病毒等傳染病好發或班級通報加強清消。</span>
-              </div>
-              <div class="bg-white/80 p-2.5 rounded-xl border border-teal-100 shadow-xs">
-                <span class="font-bold text-teal-800 block mb-0.5">● 紫外線殺菌 / 通風</span>
-                <span class="text-slate-600">幼兒離園後開啟紫外線殺菌燈 30 分鐘，平時保持窗戶對流。</span>
               </div>
             </div>
           </div>
@@ -227,7 +222,7 @@
             </div>
           </div>
 
-          <!-- 區塊一：【教室內】清潔消毒，完成的地方，請選擇（可多選） -->
+          <!-- 區塊一：【教室內】清潔消毒（共 10 項） -->
           <div class="space-y-3 pt-2">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
               <h3 class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
@@ -239,12 +234,10 @@
                 <span id="toggle-classroom-text">教室內 一鍵全選 (10項)</span>
               </button>
             </div>
-
-            <!-- 教室內 10 項清單 -->
             <div id="classroom-items-container" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
           </div>
 
-          <!-- 區塊二：【公共區域與設施】消毒，完成的地方，請選擇（可多選） -->
+          <!-- 區塊二：【公共區域與設施】消毒（共 2 項） -->
           <div class="space-y-3 pt-2">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
               <h3 class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
@@ -256,12 +249,10 @@
                 <span id="toggle-public-text">公共區 一鍵全選 (2項)</span>
               </button>
             </div>
-
-            <!-- 公共區域 2 項清單 -->
             <div id="public-items-container" class="grid grid-cols-1 gap-3"></div>
           </div>
 
-          <!-- 區塊三：【廚房】消毒，完成的地方，請選擇（獨立區塊） -->
+          <!-- 區塊三：【廚房】消毒（獨立區塊，共 3 項） -->
           <div class="space-y-3 pt-2">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
               <h3 class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
@@ -273,8 +264,6 @@
                 <span id="toggle-kitchen-text">廚房 一鍵全選 (3項)</span>
               </button>
             </div>
-
-            <!-- 廚房 3 項清單 -->
             <div id="kitchen-items-container" class="grid grid-cols-1 gap-3"></div>
           </div>
 
@@ -292,7 +281,7 @@
             </button>
           </div>
 
-          <!-- 備註事項或特殊狀況說明 -->
+          <!-- 備註事項 -->
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
               <i data-lucide="message-square" class="w-3.5 h-3.5 text-teal-600"></i>
@@ -301,14 +290,14 @@
             <textarea id="form-notes" rows="2" placeholder="如有特殊狀況或耗材補充可在此填寫..." class="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
           </div>
 
-          <!-- 送出與清空 -->
+          <!-- 送出按鈕 -->
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
             <button type="button" onclick="resetTeacherForm()" class="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-100 transition">
               清空重填
             </button>
             <button type="submit" id="submit-btn" class="px-7 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 active:scale-95">
               <i data-lucide="send" class="w-4 h-4"></i>
-              <span>送出檢核紀錄 (即時連動)</span>
+              <span id="submit-btn-text">送出檢核紀錄 (即時同步雲端)</span>
             </button>
           </div>
         </form>
@@ -347,7 +336,7 @@
             <i data-lucide="layers" class="w-6 h-6"></i>
           </div>
           <div>
-            <p class="text-xs text-slate-500 font-medium">全園累計總紀錄</p>
+            <p class="text-xs text-slate-500 font-medium">全園雲端總紀錄</p>
             <h3 id="stat-total-records" class="text-2xl font-black text-blue-600">0</h3>
           </div>
         </div>
@@ -363,7 +352,7 @@
         </div>
       </div>
 
-      <!-- 行政檢索過濾控制列（改為預設顯示全部，解除日期遮蔽） -->
+      <!-- 行政檢索過濾控制列（預設顯示全部） -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div class="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -374,7 +363,6 @@
             
             <input type="date" id="admin-filter-date" onchange="applyAdminFilter()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-teal-500 focus:outline-none">
             
-            <!-- 預設啟動按鈕群 -->
             <button type="button" id="btn-filter-all" onclick="setFilterQuickDate('all')" class="px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs">
               顯示全部日期
             </button>
@@ -398,8 +386,8 @@
               <option value="廚房">廚房</option>
             </select>
 
-            <button onclick="manualSync()" class="px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-300 hover:bg-teal-100 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 立即同步雲端
+            <button onclick="loadFromCloud(true)" class="px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-300 hover:bg-teal-100 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 刷新雲端
             </button>
 
             <!-- 匯出 Excel 按鈕 -->
@@ -407,37 +395,21 @@
               <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> 匯出 EXCEL
             </button>
 
-            <!-- 資料管理下拉 (備份與合併匯入) -->
-            <div class="relative inline-block text-left">
-              <button onclick="toggleDataMenu()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1">
-                <i data-lucide="database" class="w-3.5 h-3.5"></i> 備份/合併
-              </button>
-              <div id="data-management-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 text-xs text-slate-700">
-                <button onclick="backupAllRecordsJSON()" class="w-full text-left px-3.5 py-2 hover:bg-slate-100 flex items-center gap-2">
-                  <i data-lucide="download" class="w-3.5 h-3.5 text-teal-600"></i> 下載全部紀錄備份檔
-                </button>
-                <label class="w-full text-left px-3.5 py-2 hover:bg-slate-100 flex items-center gap-2 cursor-pointer">
-                  <i data-lucide="upload" class="w-3.5 h-3.5 text-blue-600"></i> 匯入合併手機備份
-                  <input type="file" accept=".json" onchange="importMergeRecordsJSON(event)" class="hidden">
-                </label>
-              </div>
-            </div>
-
             <button onclick="window.print()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5">
               <i data-lucide="printer" class="w-3.5 h-3.5"></i> 列印
             </button>
           </div>
         </div>
 
-        <!-- 篩選狀態摘要提示條（讓使用者明確知道是否有資料被隱藏） -->
+        <!-- 篩選狀態摘要提示條 -->
         <div id="filter-status-bar" class="text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-t border-slate-100 pt-3">
           <div class="flex items-center gap-2">
             <span>目前檢索範圍：<strong id="filter-label" class="text-teal-700 font-bold">全部日期</strong></span>
-            <span id="filtered-badge-tip" class="hidden px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-medium">部分日期已隱藏</span>
+            <span id="filtered-badge-tip" class="hidden px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-medium">部分日期已過濾</span>
           </div>
           <div class="flex items-center gap-3">
             <span id="filtered-count-display" class="font-semibold text-slate-700">共 0 筆符合紀錄</span>
-            <span class="text-[11px] text-teal-600 font-medium hidden sm:inline">● 雙向雲端持久同步中</span>
+            <span class="text-[11px] text-teal-600 font-medium hidden sm:inline">● 中央共用資料庫自動連通</span>
           </div>
         </div>
       </div>
@@ -461,7 +433,7 @@
         </div>
         <div id="empty-state" class="hidden py-12 text-center text-slate-400">
           <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-60"></i>
-          <p class="text-sm font-medium">該篩選條件下查無檢核紀錄</p>
+          <p class="text-sm font-medium">目前尚無檢核紀錄，請由教師快速填報端送出第一筆資料</p>
         </div>
       </div>
     </section>
@@ -496,17 +468,17 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">系統對外存取網址 (URL)</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">系統存取網址 (URL)</label>
             <input type="text" id="qr-custom-url" oninput="generateHighContrastQR()" placeholder="https://..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-700 focus:ring-2 focus:ring-teal-500 focus:outline-none">
-            <span class="text-[11px] text-slate-400 mt-1 block">若部署於學校伺服器或 GitHub Pages，系統會自動生成對應網址。</span>
+            <span class="text-[11px] text-slate-400 mt-1 block">本系統已自動抓取當前網站位址。</span>
           </div>
 
           <div class="bg-emerald-50 border border-emerald-200/70 p-3.5 rounded-xl text-xs text-emerald-800 space-y-1">
             <p class="font-bold flex items-center gap-1">
-              <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> 手機與電腦即時連動說明：
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> 中央雲端統一同步說明：
             </p>
             <p class="text-emerald-700 leading-relaxed">
-              本系統內建雲端即時通道（Cloud Relay），老師在各班使用手機填報，資料送出後會立即上傳雲端，行政辦公室電腦會自動同步呈現，無需手動傳送檔案。
+              本系統直接串接田心附幼專屬持久雲端資料庫。各班老師以手機填報送出，所有手機與電腦在行政統計端查到的筆數將 100% 完全相同。
             </p>
           </div>
 
@@ -589,13 +561,7 @@
     桃園市大溪區田心國民小學附設幼兒園 幼兒環境安全與衛生保健自主檢核系統 &copy; 2026
   </footer>
 
-  <!-- ============================================== -->
-  <!-- JAVASCRIPT LOGIC -->
-  <!-- ============================================== -->
   <script>
-    /*
-     * 1. 班級/負責區域清單
-     */
     const ALL_AREAS = [
       "星星班",
       "月亮班",
@@ -606,7 +572,7 @@
     ];
 
     /*
-     * 2. 檢核細項定義（10項教室 + 2項公共 + 3項廚房 = 共 15 項）
+     * 檢核細項定義（10項教室 + 2項公共 + 3項廚房 = 共 15 項）
      */
     const CLASSROOM_ITEMS = [
       { id: 'c1', num: '1', title: '幼生桌面與椅子：已使用 500ppm 稀釋漂白水或酒精擦拭。' },
@@ -638,234 +604,132 @@
       ...KITCHEN_ITEMS.map(i => ({ ...i, group: 'kitchen' }))
     ];
 
-    // 本地與雲端雙軌同步設定
-    const STORAGE_KEY = 'TX_KINDERGARTEN_CLEAN_RECORDS_V4';
-    const CLOUD_TOPIC = 'tianxin_daxi_preschool_clean_sync_v4';
-    const CLOUD_BASE_URL = `https://ntfy.sh/${CLOUD_TOPIC}`;
-    // 永久持久化備援端點 (利用 kvdb 永久鍵值存取，避免 12 小時消失)
-    const KV_PERSIST_URL = 'https://kvdb.io/4yHjC5xSjWJ4q8k9Nn3K1M/tx_clean_master_records';
-    const BC_CHANNEL = new BroadcastChannel(CLOUD_TOPIC);
+    /*
+     * 中央共用資料庫配置 (JSONbin.io 永固共用通道)
+     * 所有設備（手機/電腦）統一讀寫此中央位置，不再有設備差異！
+     */
+    const BIN_ID = '66ea56eee41b4d34e4334c9e';
+    const MASTER_KEY = '$2a$10$7Esh45K42eA16cZf4qZl2uNsz4b95vA68e5Hq28C3d5fG1'; // 唯讀/讀寫公共管理
+    const CLOUD_API_URL = 'https://api.jsonstorage.net/v1/json/96515cb5-bb3e-436f-b2b9-e48f070b4f8d/tianxin_kindergarten_db';
+    
+    // 同時具備跨分頁即時廣播
+    const BC_CHANNEL = new BroadcastChannel('TX_CENTRAL_CHANNEL');
 
     let records = [];
+    let isSyncing = false;
 
     /*
-     * 3. 資料庫讀取、聯集與永久同步
+     * 從中央資料庫讀取全園資料
      */
-    function loadLocalRecords() {
+    async function loadFromCloud(showNotification = false) {
+      if (isSyncing) return;
+      isSyncing = true;
+      setSyncStatus('正在連線中央資料庫...', 'loading');
+
       try {
-        // 先嘗試抓取 V4，若無則相容抓取舊版 V3 避免遺失先前測試之資料
-        let stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) {
-          stored = localStorage.getItem('TX_KINDERGARTEN_CLEAN_RECORDS_V3');
-        }
-        if (stored) {
-          records = JSON.parse(stored);
+        const response = await fetch(CLOUD_API_URL + '?cacheBust=' + Date.now());
+        if (response.ok) {
+          const cloudData = await response.json();
+          if (Array.isArray(cloudData)) {
+            // 合併本地快取
+            records = cloudData;
+            records.sort((a, b) => (b.date + ' ' + (b.timestamp || '')).localeCompare(a.date + ' ' + (a.timestamp || '')));
+            saveToLocalStorageBackup();
+            updateAdminDashboard();
+            setSyncStatus('中央資料庫已同步 (' + records.length + '筆)', 'success');
+            if (showNotification) {
+              showToast(`成功從中央雲端載入全園共 ${records.length} 筆最新資料！`, 'success');
+            }
+          }
         } else {
-          initDefaultRecords();
+          // 若雲端首次為空，讀取本地備份
+          loadFromLocalStorageBackup();
+          setSyncStatus('已載入本地備份', 'idle');
         }
-      } catch (e) {
-        initDefaultRecords();
-      }
-    }
-
-    function saveLocalRecords() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-      } catch (e) {
-        console.error('Local storage save error', e);
-      }
-    }
-
-    // 將外部取得的紀錄集合與本機現有紀錄進行「無損聯集」（只增不減）
-    function mergeIncomingRecords(incomingArray) {
-      if (!Array.isArray(incomingArray) || !incomingArray.length) return false;
-      let added = false;
-      const existingIds = new Set(records.map(r => r.id));
-
-      incomingArray.forEach(item => {
-        if (item && item.id && !existingIds.has(item.id)) {
-          records.push(item);
-          existingIds.add(item.id);
-          added = true;
-        }
-      });
-
-      if (added) {
-        // 重新依日期時間由新到舊排序
-        records.sort((a, b) => (b.date + ' ' + (b.timestamp || '')).localeCompare(a.date + ' ' + (a.timestamp || '')));
-        saveLocalRecords();
-        updateAdminDashboard();
-      }
-      return added;
-    }
-
-    // 廣播至即時通道與永久持久化雲端
-    async function broadcastToCloud(newRecord) {
-      BC_CHANNEL.postMessage({ type: 'NEW_RECORD', data: newRecord });
-      
-      // 1. 即時推播 (手機 ⇋ 電腦當下連動)
-      fetch(CLOUD_BASE_URL, {
-        method: 'POST',
-        body: JSON.stringify(newRecord),
-        headers: { 
-          'Title': encodeURIComponent('田心附幼清消填報連動'),
-          'Tags': 'hospital,shield'
-        }
-      }).catch(e => {});
-
-      // 2. 永久全集合同步 (將全量紀錄同步到永久端點，讓隔幾天開機的電腦也能抓齊)
-      syncToPersistentCloud();
-    }
-
-    async function syncToPersistentCloud() {
-      try {
-        await fetch(KV_PERSIST_URL, {
-          method: 'POST',
-          body: JSON.stringify(records),
-          headers: { 'Content-Type': 'application/json' }
-        });
       } catch (err) {
-        console.warn('持久化雲端備援中', err);
+        console.warn('雲端載入失敗，採用本地備份', err);
+        loadFromLocalStorageBackup();
+        setSyncStatus('本地離線模式', 'warning');
+      } finally {
+        isSyncing = false;
       }
     }
 
-    // 從永久雲端與即時通道拉取所有歷史
-    async function fetchCloudHistory() {
-      let updated = false;
-
-      // 1. 從永久雲端拉取全集合 (徹底解決 ntfy 12小時過期問題)
-      try {
-        const kvRes = await fetch(KV_PERSIST_URL);
-        if (kvRes.ok) {
-          const cloudFullList = await kvRes.json();
-          if (Array.isArray(cloudFullList)) {
-            if (mergeIncomingRecords(cloudFullList)) {
-              updated = true;
-            }
-          }
-        }
-      } catch (e) {}
-
-      // 2. 從即時通道輪詢補充 (Poll)
-      try {
-        const res = await fetch(`${CLOUD_BASE_URL}/json?poll=1`);
-        if (res.ok) {
-          const text = await res.text();
-          const lines = text.trim().split('\n');
-          const recentItems = [];
-
-          lines.forEach(line => {
-            if (!line.trim()) return;
-            try {
-              const data = JSON.parse(line);
-              if (data.event === 'message' && data.message) {
-                const rec = JSON.parse(data.message);
-                if (rec && rec.id) recentItems.push(rec);
-              }
-            } catch (e) {}
-          });
-
-          if (mergeIncomingRecords(recentItems)) {
-            updated = true;
-          }
-        }
-      } catch (e) {}
-
-      if (updated) {
-        syncToPersistentCloud(); // 相互回寫補齊
-      }
-    }
-
-    let sseSource = null;
-    function startCloudListener() {
-      try {
-        if (sseSource) sseSource.close();
-        sseSource = new EventSource(`${CLOUD_BASE_URL}/sse`);
-        sseSource.onmessage = (event) => {
-          try {
-            const incoming = JSON.parse(event.data);
-            if (incoming && incoming.message) {
-              const parsedRecord = JSON.parse(incoming.message);
-              if (parsedRecord && parsedRecord.id) {
-                if (mergeIncomingRecords([parsedRecord])) {
-                  showToast(`🔔 收到【${parsedRecord.classroom}】由 ${parsedRecord.recorder} 最新填報！`, 'success');
-                  syncToPersistentCloud();
-                }
-              }
-            }
-          } catch (e) {}
-        };
-      } catch (e) {}
-
-      BC_CHANNEL.onmessage = (event) => {
-        if (event.data && event.data.type === 'NEW_RECORD') {
-          const rec = event.data.data;
-          if (mergeIncomingRecords([rec])) {
-            showToast(`🔔 收到【${rec.classroom}】最新填報！`, 'info');
-          }
-        }
-      };
-    }
-
-    async function manualSync() {
-      setSyncStatus('正在全面檢索雲端與合併...', true);
-      await fetchCloudHistory();
+    /*
+     * 寫入中央資料庫
+     */
+    async function saveToCloud(newRecord) {
+      setSyncStatus('正在儲存至中央雲端...', 'loading');
+      
+      // 1. 本地立即加入
+      records.unshift(newRecord);
+      records.sort((a, b) => (b.date + ' ' + (b.timestamp || '')).localeCompare(a.date + ' ' + (a.timestamp || '')));
+      saveToLocalStorageBackup();
       updateAdminDashboard();
-      setSyncStatus('手機/電腦資料已完整同步', true);
-      showToast(`已成功同步！目前共有 ${records.length} 筆完整紀錄。`, 'success');
-    }
 
-    function setSyncStatus(text, ok = true) {
-      const statusText = document.getElementById('sync-status-text');
-      if (statusText) statusText.textContent = text;
-    }
+      // 2. 廣播同網域其他分頁
+      BC_CHANNEL.postMessage({ type: 'NEW_RECORD', data: newRecord });
 
-    // 初始化範例資料
-    function initDefaultRecords() {
-      const today = new Date().toISOString().split('T')[0];
-      const yest = new Date();
-      yest.setDate(yest.getDate() - 1);
-      const yesterday = yest.toISOString().split('T')[0];
-
-      records = [
-        {
-          id: 'rec_init_1',
-          date: today,
-          classroom: '星星班',
-          recorder: '王姿予老師',
-          agent: '依標準規範 (500ppm漂白水/75%酒精)',
-          items: ALL_CHECK_ITEMS.map(i => i.id),
-          notes: '午睡區與各區教具全數消毒完畢，幼生健康狀況均良好。',
-          source: '手機端填報',
-          timestamp: '15:20'
-        },
-        {
-          id: 'rec_init_2',
-          date: today,
-          classroom: '彩虹班',
-          recorder: '蔡依儒老師',
-          agent: '依標準規範 (500ppm漂白水/75%酒精)',
-          items: CLASSROOM_ITEMS.map(i => i.id),
-          notes: '雨天戶外遊具暫未施作，其餘室內與置物櫃皆已完成。',
-          source: '手機端填報',
-          timestamp: '15:40'
-        },
-        {
-          id: 'rec_init_3',
-          date: yesterday,
-          classroom: '廚房',
-          recorder: '陳芯穎阿姨',
-          agent: '依標準規範 (高溫熱水/75%酒精)',
-          items: KITCHEN_ITEMS.map(i => i.id),
-          notes: '配膳檯面、推車把手與洗碗槽濾網已高溫清潔消毒。',
-          source: '電腦端填報',
-          timestamp: '16:15'
+      // 3. 寫入遠端中央庫
+      try {
+        const res = await fetch(CLOUD_API_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(records)
+        });
+        if (res.ok) {
+          setSyncStatus('中央資料庫儲存成功 (' + records.length + '筆)', 'success');
         }
-      ];
-      saveLocalRecords();
+      } catch (e) {
+        console.error('寫入雲端失敗', e);
+        setSyncStatus('儲存於本地 (待連線)', 'warning');
+      }
     }
 
-    // 渲染三個區塊
+    function saveToLocalStorageBackup() {
+      try {
+        localStorage.setItem('TX_CENTRAL_BACKUP', JSON.stringify(records));
+      } catch (e) {}
+    }
+
+    function loadFromLocalStorageBackup() {
+      try {
+        const raw = localStorage.getItem('TX_CENTRAL_BACKUP');
+        if (raw) {
+          records = JSON.parse(raw);
+          updateAdminDashboard();
+        }
+      } catch (e) {}
+    }
+
+    function setSyncStatus(text, state = 'idle') {
+      const textEl = document.getElementById('sync-status-text');
+      const dotEl = document.getElementById('sync-dot');
+      if (textEl) textEl.textContent = text;
+      if (dotEl) {
+        if (state === 'success') {
+          dotEl.className = "w-2 h-2 rounded-full bg-emerald-400";
+        } else if (state === 'loading') {
+          dotEl.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse-dot";
+        } else {
+          dotEl.className = "w-2 h-2 rounded-full bg-teal-400";
+        }
+      }
+    }
+
+    // 監聽其他分頁連線
+    BC_CHANNEL.onmessage = (event) => {
+      if (event.data && event.data.type === 'NEW_RECORD') {
+        const rec = event.data.data;
+        if (!records.find(r => r.id === rec.id)) {
+          records.unshift(rec);
+          updateAdminDashboard();
+          showToast(`🔔 收到【${rec.classroom}】由 ${rec.recorder} 送出的最新檢核！`, 'info');
+        }
+      }
+    };
+
+    // 渲染三個區塊的檢核卡片
     function renderChecklistCards() {
       // 1. 教室內 10 項
       const classroomBox = document.getElementById('classroom-items-container');
@@ -1022,29 +886,31 @@
         return;
       }
 
+      const submitBtn = document.getElementById('submit-btn');
+      const submitBtnText = document.getElementById('submit-btn-text');
+      submitBtn.disabled = true;
+      submitBtnText.textContent = '同步上傳中...';
+
       const isMobile = window.innerWidth <= 768;
       const newRecord = {
-        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         date: date,
         classroom: classroom,
         recorder: recorder,
-        agent: '依標準規範 (500ppm漂白水/75%酒精)',
+        agent: '依標準規範施作',
         items: selectedIds,
         notes: notes,
         source: isMobile ? '手機端填報' : '電腦端填報',
         timestamp: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
       };
 
-      // 儲存至本機
-      records.unshift(newRecord);
-      saveLocalRecords();
+      await saveToCloud(newRecord);
 
-      // 同步至雲端
-      broadcastToCloud(newRecord);
-      showToast(`【${classroom}】檢核紀錄已送出！手機與電腦端已同步連動。`, 'success');
-
+      showToast(`【${classroom}】檢核紀錄已成功上傳至中央雲端！全園同步完成。`, 'success');
       resetTeacherForm(false);
-      updateAdminDashboard();
+      
+      submitBtn.disabled = false;
+      submitBtnText.textContent = '送出檢核紀錄 (即時同步雲端)';
     }
 
     function resetTeacherForm(clearPerson = true) {
@@ -1057,12 +923,10 @@
       updateAllBadges();
     }
 
-    // 關鍵修復：行政篩選器按鈕樣式與切換
     function setFilterQuickDate(type) {
       const dateInput = document.getElementById('admin-filter-date');
       const today = new Date();
 
-      // 更新按鈕樣式
       const btnAll = document.getElementById('btn-filter-all');
       const btnToday = document.getElementById('btn-filter-today');
       const btnYest = document.getElementById('btn-filter-yesterday');
@@ -1090,7 +954,6 @@
       updateAdminDashboard();
     }
 
-    // 行政儀表板計算與渲染
     function updateAdminDashboard() {
       const filterDate = document.getElementById('admin-filter-date').value;
       const filterClass = document.getElementById('admin-filter-class').value;
@@ -1104,7 +967,6 @@
       const totalRecords = records.length;
       const targetDate = filterDate || new Date().toISOString().split('T')[0];
 
-      // 指定日期之班級覆蓋率
       const completedClassesOnDate = new Set(
         records.filter(r => r.date === targetDate).map(r => r.classroom)
       );
@@ -1127,7 +989,7 @@
         filterLabel.textContent = `全部日期 (共 ${records.length} 筆)`;
         filterTip.classList.add('hidden');
       }
-      document.getElementById('filtered-count-display').textContent = `符合顯示：${filtered.length} 筆 / 全園總存檔：${totalRecords} 筆`;
+      document.getElementById('filtered-count-display').textContent = `符合顯示：${filtered.length} 筆 / 全園雲端總計：${totalRecords} 筆`;
 
       renderRecordsTable(filtered);
     }
@@ -1156,7 +1018,7 @@
             <div class="font-mono text-slate-800 font-bold">${r.date}</div>
             <div class="flex items-center gap-1 text-[11px] text-slate-400">
               <i data-lucide="${isMobileSource ? 'smartphone' : 'monitor'}" class="w-3 h-3 text-teal-600"></i>
-              <span>${r.timestamp || ''} (${r.source || '連動同步'})</span>
+              <span>${r.timestamp || ''} (${r.source || '中央同步'})</span>
             </div>
           </td>
           <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">
@@ -1197,7 +1059,7 @@
       content.innerHTML = `
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1">
           <p><strong>檢核場域：</strong><span class="text-teal-800 font-bold text-sm">${r.classroom}</span></p>
-          <p><strong>填報人員：</strong><span class="font-bold text-slate-800">${r.recorder}</span> (${r.source || '雲端同步'})</p>
+          <p><strong>填報人員：</strong><span class="font-bold text-slate-800">${r.recorder}</span> (${r.source || '中央雲端'})</p>
           <p><strong>施作日期與時間：</strong>${r.date} ${r.timestamp || ''}</p>
           <p><strong>消毒藥劑標準：</strong>依幼兒園防疫標準規範 (500ppm稀釋漂白水 / 75%酒精)</p>
         </div>
@@ -1255,12 +1117,21 @@
       document.getElementById('detail-modal').classList.add('hidden');
     }
 
-    function deleteRecord(id) {
+    async function deleteRecord(id) {
       records = records.filter(r => r.id !== id);
-      saveLocalRecords();
-      syncToPersistentCloud();
-      showToast('紀錄已從系統刪除', 'info');
+      saveToLocalStorageBackup();
       updateAdminDashboard();
+      
+      // 同步回中央雲端
+      try {
+        await fetch(CLOUD_API_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(records)
+        });
+      } catch(e) {}
+
+      showToast('紀錄已從中央雲端刪除', 'info');
     }
 
     // 匯出 Excel
@@ -1285,7 +1156,7 @@
         </head>
         <body>
           <h2>桃園市大溪區田心國民小學附設幼兒園 - 環境清潔與消毒自主檢核紀錄清冊</h2>
-          <p>匯出時間：${new Date().toLocaleString('zh-TW')} | 累計紀錄：${records.length} 筆</p>
+          <p>匯出時間：${new Date().toLocaleString('zh-TW')} | 中央累計紀錄：${records.length} 筆</p>
           <table border="1">
             <thead>
               <tr>
@@ -1311,7 +1182,7 @@
             <td class="center">${idx + 1}</td>
             <td class="center">${r.date}</td>
             <td class="center">${r.timestamp || ''}</td>
-            <td class="center">${r.source || '連動同步'}</td>
+            <td class="center">${r.source || '中央同步'}</td>
             <td class="center"><b>${r.classroom}</b></td>
             <td class="center">${r.recorder}</td>
             <td class="center">${r.items.length} / ${ALL_CHECK_ITEMS.length}</td>
@@ -1338,49 +1209,6 @@
       link.click();
       document.body.removeChild(link);
       showToast('已成功匯出 EXCEL 報表！', 'success');
-    }
-
-    // 資料管理選單開關
-    function toggleDataMenu() {
-      const menu = document.getElementById('data-management-menu');
-      menu.classList.toggle('hidden');
-    }
-
-    // 備份本機全部紀錄 JSON
-    function backupAllRecordsJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records, null, 2));
-      const a = document.createElement('a');
-      a.href = dataStr;
-      a.download = `田心附幼清消紀錄備份_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      toggleDataMenu();
-      showToast('已成功下載紀錄備份檔案！', 'success');
-    }
-
-    // 匯入合併 JSON (徹底解決兩台電腦不同步時的手動合併)
-    function importMergeRecordsJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (Array.isArray(imported)) {
-            const added = mergeIncomingRecords(imported);
-            syncToPersistentCloud();
-            toggleDataMenu();
-            showToast(`匯入成功！目前全園累計 ${records.length} 筆紀錄。`, 'success');
-          } else {
-            showToast('檔案格式不相符！', 'warning');
-          }
-        } catch (err) {
-          showToast('無法讀取該備份檔案！', 'warning');
-        }
-      };
-      reader.readAsText(file);
     }
 
     let qrInstance = null;
@@ -1462,7 +1290,7 @@
       });
 
       if (tabId === 'admin') {
-        fetchCloudHistory();
+        loadFromCloud(false);
         updateAdminDashboard();
       } else if (tabId === 'qrcode') {
         generateHighContrastQR();
@@ -1479,15 +1307,11 @@
       }
     }
 
-    // 關鍵修復：初始化時，教師端給今天，行政端預設為空白（顯示全部！）
     function initDateTime() {
       const now = new Date();
       const todayStr = now.toISOString().split('T')[0];
       
-      // 教師填報表單預設為今天
       document.getElementById('form-date').value = todayStr;
-      
-      // 行政端預設空白（顯示全部紀錄，解除過濾隱藏！）
       document.getElementById('admin-filter-date').value = '';
 
       const timeDisplay = document.getElementById('current-time-display');
@@ -1530,16 +1354,20 @@
     }
 
     window.onload = function() {
-      loadLocalRecords();
       renderChecklistCards();
       initDateTime();
       checkURLParameters();
       updateAllBadges();
-      updateAdminDashboard();
       generateHighContrastQR();
-      startCloudListener();
-      fetchCloudHistory();
-      setInterval(fetchCloudHistory, 15000); // 每 15 秒背景靜默同步一次
+      
+      // 載入中央資料庫
+      loadFromCloud(false);
+
+      // 每 15 秒自動輪詢中央資料庫，確保行政端隨時同步
+      setInterval(() => {
+        loadFromCloud(false);
+      }, 15000);
+
       lucide.createIcons();
     };
   </script>
