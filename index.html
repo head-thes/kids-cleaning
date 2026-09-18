@@ -337,7 +337,7 @@
             <i data-lucide="percent" class="w-6 h-6"></i>
           </div>
           <div>
-            <p class="text-xs text-slate-500 font-medium">當日覆蓋申報率</p>
+            <p class="text-xs text-slate-500 font-medium">指定日期覆蓋率</p>
             <h3 id="stat-coverage-rate" class="text-2xl font-black text-emerald-600">0%</h3>
           </div>
         </div>
@@ -347,7 +347,7 @@
             <i data-lucide="layers" class="w-6 h-6"></i>
           </div>
           <div>
-            <p class="text-xs text-slate-500 font-medium">手機/電腦累計筆數</p>
+            <p class="text-xs text-slate-500 font-medium">全園累計總紀錄</p>
             <h3 id="stat-total-records" class="text-2xl font-black text-blue-600">0</h3>
           </div>
         </div>
@@ -357,37 +357,39 @@
             <i data-lucide="message-square-warning" class="w-6 h-6"></i>
           </div>
           <div>
-            <p class="text-xs text-slate-500 font-medium">異常/特殊通報數</p>
+            <p class="text-xs text-slate-500 font-medium">特殊備註/異常數</p>
             <h3 id="stat-warning-notes" class="text-2xl font-black text-amber-600">0</h3>
           </div>
         </div>
       </div>
 
-      <!-- 行政檢索過濾控制列（精準單日日期篩選核心） -->
+      <!-- 行政檢索過濾控制列（改為預設顯示全部，解除日期遮蔽） -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div class="flex flex-wrap items-center gap-3">
-            <div class="flex items-center gap-2">
-              <i data-lucide="filter" class="w-4 h-4 text-teal-600"></i>
-              <span class="text-sm font-bold text-slate-800">精準單日日期篩選：</span>
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-1.5 text-sm font-bold text-slate-800">
+              <i data-lucide="calendar" class="w-4 h-4 text-teal-600"></i>
+              <span>日期篩選：</span>
             </div>
+            
             <input type="date" id="admin-filter-date" onchange="applyAdminFilter()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-teal-500 focus:outline-none">
             
-            <button onclick="setFilterQuickDate('today')" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition">
+            <!-- 預設啟動按鈕群 -->
+            <button type="button" id="btn-filter-all" onclick="setFilterQuickDate('all')" class="px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs">
+              顯示全部日期
+            </button>
+            <button type="button" id="btn-filter-today" onclick="setFilterQuickDate('today')" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition">
               今日
             </button>
-            <button onclick="setFilterQuickDate('yesterday')" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition">
+            <button type="button" id="btn-filter-yesterday" onclick="setFilterQuickDate('yesterday')" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition">
               昨日
-            </button>
-            <button onclick="setFilterQuickDate('all')" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition">
-              顯示全部
             </button>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <!-- 班級類別篩選 -->
+            <!-- 班級篩選 -->
             <select id="admin-filter-class" onchange="applyAdminFilter()" class="bg-slate-50 border border-slate-300 text-xs sm:text-sm rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-teal-500 focus:outline-none">
-              <option value="">全部班級/負責區域</option>
+              <option value="">全部班級/區域</option>
               <option value="星星班">星星班</option>
               <option value="月亮班">月亮班</option>
               <option value="彩虹班">彩虹班</option>
@@ -396,25 +398,46 @@
               <option value="廚房">廚房</option>
             </select>
 
-            <button onclick="manualSync()" class="px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5">
+            <button onclick="manualSync()" class="px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-300 hover:bg-teal-100 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 立即同步雲端
             </button>
-            <!-- 匯出 Excel 專用按鈕 -->
+
+            <!-- 匯出 Excel 按鈕 -->
             <button onclick="exportToExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5 shadow-xs">
               <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> 匯出 EXCEL
             </button>
+
+            <!-- 資料管理下拉 (備份與合併匯入) -->
+            <div class="relative inline-block text-left">
+              <button onclick="toggleDataMenu()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1">
+                <i data-lucide="database" class="w-3.5 h-3.5"></i> 備份/合併
+              </button>
+              <div id="data-management-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 text-xs text-slate-700">
+                <button onclick="backupAllRecordsJSON()" class="w-full text-left px-3.5 py-2 hover:bg-slate-100 flex items-center gap-2">
+                  <i data-lucide="download" class="w-3.5 h-3.5 text-teal-600"></i> 下載全部紀錄備份檔
+                </button>
+                <label class="w-full text-left px-3.5 py-2 hover:bg-slate-100 flex items-center gap-2 cursor-pointer">
+                  <i data-lucide="upload" class="w-3.5 h-3.5 text-blue-600"></i> 匯入合併手機備份
+                  <input type="file" accept=".json" onchange="importMergeRecordsJSON(event)" class="hidden">
+                </label>
+              </div>
+            </div>
+
             <button onclick="window.print()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl font-medium transition flex items-center gap-1.5">
-              <i data-lucide="printer" class="w-3.5 h-3.5"></i> 列印清冊
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i> 列印
             </button>
           </div>
         </div>
 
-        <!-- 篩選狀態摘要條 -->
-        <div id="filter-status-bar" class="text-xs text-slate-500 flex items-center justify-between border-t border-slate-100 pt-3">
-          <span>正在檢索：<strong id="filter-label" class="text-teal-700">全部日期</strong></span>
+        <!-- 篩選狀態摘要提示條（讓使用者明確知道是否有資料被隱藏） -->
+        <div id="filter-status-bar" class="text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-t border-slate-100 pt-3">
+          <div class="flex items-center gap-2">
+            <span>目前檢索範圍：<strong id="filter-label" class="text-teal-700 font-bold">全部日期</strong></span>
+            <span id="filtered-badge-tip" class="hidden px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-medium">部分日期已隱藏</span>
+          </div>
           <div class="flex items-center gap-3">
-            <span id="filtered-count-display">共 0 筆符合紀錄</span>
-            <span class="text-[11px] text-teal-600 font-medium">● 手機與電腦雙向即時連動中</span>
+            <span id="filtered-count-display" class="font-semibold text-slate-700">共 0 筆符合紀錄</span>
+            <span class="text-[11px] text-teal-600 font-medium hidden sm:inline">● 雙向雲端持久同步中</span>
           </div>
         </div>
       </div>
@@ -583,9 +606,8 @@
     ];
 
     /*
-     * 2. 檢核細項定義（含您指定更新之精準文字）
+     * 2. 檢核細項定義（10項教室 + 2項公共 + 3項廚房 = 共 15 項）
      */
-    // 【教室內】清潔消毒 (共 10 項)
     const CLASSROOM_ITEMS = [
       { id: 'c1', num: '1', title: '幼生桌面與椅子：已使用 500ppm 稀釋漂白水或酒精擦拭。' },
       { id: 'c2', num: '2', title: '教具與玩具：已完成表面消毒（含積木、拼圖、操作教具）。' },
@@ -599,40 +621,43 @@
       { id: 'c10', num: '10', title: '配膳區：配膳檯面、洗手檯水槽及檯面（已完成清潔）。' }
     ];
 
-    // 【公共區域與設施】消毒 (共 2 項)
     const PUBLIC_ITEMS = [
       { id: 'p1', num: '1', title: '戶外遊樂設施：溜滑梯扶手、攀爬架、遊具握把（已完成噴灑/擦拭）。' },
       { id: 'p2', num: '2', title: '公共動線接觸面：全校樓梯扶手（已完成擦拭）。' }
     ];
 
-    // 【廚房】消毒 (獨立 3 項)
     const KITCHEN_ITEMS = [
       { id: 'k1', num: '1', title: '配膳檯面、推車把手、冰箱門把、（已完成消毒、清潔）。' },
       { id: 'k2', num: '2', title: '洗碗槽濾網，已完成清潔。' },
       { id: 'k3', num: '3', title: '垃圾與廚餘：垃圾桶已清空，保持垃圾桶的乾淨、清潔。' }
     ];
 
-    // 合併全部清單共 15 項
     const ALL_CHECK_ITEMS = [
       ...CLASSROOM_ITEMS.map(i => ({ ...i, group: 'classroom' })),
       ...PUBLIC_ITEMS.map(i => ({ ...i, group: 'public' })),
       ...KITCHEN_ITEMS.map(i => ({ ...i, group: 'kitchen' }))
     ];
 
-    // 跨裝置同步通道鍵值
-    const STORAGE_KEY = 'TX_KINDERGARTEN_CLEAN_RECORDS_V3';
-    const CLOUD_TOPIC = 'tianxin_daxi_preschool_clean_sync_v3';
+    // 本地與雲端雙軌同步設定
+    const STORAGE_KEY = 'TX_KINDERGARTEN_CLEAN_RECORDS_V4';
+    const CLOUD_TOPIC = 'tianxin_daxi_preschool_clean_sync_v4';
     const CLOUD_BASE_URL = `https://ntfy.sh/${CLOUD_TOPIC}`;
+    // 永久持久化備援端點 (利用 kvdb 永久鍵值存取，避免 12 小時消失)
+    const KV_PERSIST_URL = 'https://kvdb.io/4yHjC5xSjWJ4q8k9Nn3K1M/tx_clean_master_records';
     const BC_CHANNEL = new BroadcastChannel(CLOUD_TOPIC);
 
     let records = [];
 
     /*
-     * 3. 跨裝置雲端同步
+     * 3. 資料庫讀取、聯集與永久同步
      */
     function loadLocalRecords() {
       try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        // 先嘗試抓取 V4，若無則相容抓取舊版 V3 避免遺失先前測試之資料
+        let stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+          stored = localStorage.getItem('TX_KINDERGARTEN_CLEAN_RECORDS_V3');
+        }
         if (stored) {
           records = JSON.parse(stored);
         } else {
@@ -651,51 +676,104 @@
       }
     }
 
+    // 將外部取得的紀錄集合與本機現有紀錄進行「無損聯集」（只增不減）
+    function mergeIncomingRecords(incomingArray) {
+      if (!Array.isArray(incomingArray) || !incomingArray.length) return false;
+      let added = false;
+      const existingIds = new Set(records.map(r => r.id));
+
+      incomingArray.forEach(item => {
+        if (item && item.id && !existingIds.has(item.id)) {
+          records.push(item);
+          existingIds.add(item.id);
+          added = true;
+        }
+      });
+
+      if (added) {
+        // 重新依日期時間由新到舊排序
+        records.sort((a, b) => (b.date + ' ' + (b.timestamp || '')).localeCompare(a.date + ' ' + (a.timestamp || '')));
+        saveLocalRecords();
+        updateAdminDashboard();
+      }
+      return added;
+    }
+
+    // 廣播至即時通道與永久持久化雲端
     async function broadcastToCloud(newRecord) {
       BC_CHANNEL.postMessage({ type: 'NEW_RECORD', data: newRecord });
+      
+      // 1. 即時推播 (手機 ⇋ 電腦當下連動)
+      fetch(CLOUD_BASE_URL, {
+        method: 'POST',
+        body: JSON.stringify(newRecord),
+        headers: { 
+          'Title': encodeURIComponent('田心附幼清消填報連動'),
+          'Tags': 'hospital,shield'
+        }
+      }).catch(e => {});
+
+      // 2. 永久全集合同步 (將全量紀錄同步到永久端點，讓隔幾天開機的電腦也能抓齊)
+      syncToPersistentCloud();
+    }
+
+    async function syncToPersistentCloud() {
       try {
-        await fetch(CLOUD_BASE_URL, {
+        await fetch(KV_PERSIST_URL, {
           method: 'POST',
-          body: JSON.stringify(newRecord),
-          headers: { 
-            'Title': encodeURIComponent('田心附幼清消填報連動'),
-            'Tags': 'hospital,shield'
-          }
+          body: JSON.stringify(records),
+          headers: { 'Content-Type': 'application/json' }
         });
-        setSyncStatus('已即時同步至雲端', true);
       } catch (err) {
-        console.warn('雲端排程連線中', err);
+        console.warn('持久化雲端備援中', err);
       }
     }
 
+    // 從永久雲端與即時通道拉取所有歷史
     async function fetchCloudHistory() {
+      let updated = false;
+
+      // 1. 從永久雲端拉取全集合 (徹底解決 ntfy 12小時過期問題)
       try {
-        const res = await fetch(`${CLOUD_BASE_URL}/json?poll=1`);
-        if (!res.ok) return;
-        const text = await res.text();
-        const lines = text.trim().split('\n');
-        let hasNew = false;
-
-        lines.forEach(line => {
-          if (!line.trim()) return;
-          try {
-            const data = JSON.parse(line);
-            if (data.event === 'message' && data.message) {
-              const rec = JSON.parse(data.message);
-              if (rec && rec.id && !records.some(r => r.id === rec.id)) {
-                records.unshift(rec);
-                hasNew = true;
-              }
+        const kvRes = await fetch(KV_PERSIST_URL);
+        if (kvRes.ok) {
+          const cloudFullList = await kvRes.json();
+          if (Array.isArray(cloudFullList)) {
+            if (mergeIncomingRecords(cloudFullList)) {
+              updated = true;
             }
-          } catch (e) {}
-        });
-
-        if (hasNew) {
-          records.sort((a, b) => (b.date + ' ' + (b.timestamp || '')).localeCompare(a.date + ' ' + (a.timestamp || '')));
-          saveLocalRecords();
-          updateAdminDashboard();
+          }
         }
       } catch (e) {}
+
+      // 2. 從即時通道輪詢補充 (Poll)
+      try {
+        const res = await fetch(`${CLOUD_BASE_URL}/json?poll=1`);
+        if (res.ok) {
+          const text = await res.text();
+          const lines = text.trim().split('\n');
+          const recentItems = [];
+
+          lines.forEach(line => {
+            if (!line.trim()) return;
+            try {
+              const data = JSON.parse(line);
+              if (data.event === 'message' && data.message) {
+                const rec = JSON.parse(data.message);
+                if (rec && rec.id) recentItems.push(rec);
+              }
+            } catch (e) {}
+          });
+
+          if (mergeIncomingRecords(recentItems)) {
+            updated = true;
+          }
+        }
+      } catch (e) {}
+
+      if (updated) {
+        syncToPersistentCloud(); // 相互回寫補齊
+      }
     }
 
     let sseSource = null;
@@ -708,11 +786,11 @@
             const incoming = JSON.parse(event.data);
             if (incoming && incoming.message) {
               const parsedRecord = JSON.parse(incoming.message);
-              if (parsedRecord && parsedRecord.id && !records.some(r => r.id === parsedRecord.id)) {
-                records.unshift(parsedRecord);
-                saveLocalRecords();
-                updateAdminDashboard();
-                showToast(`🔔 收到【${parsedRecord.classroom}】由 ${parsedRecord.recorder} 最新填報！`, 'success');
+              if (parsedRecord && parsedRecord.id) {
+                if (mergeIncomingRecords([parsedRecord])) {
+                  showToast(`🔔 收到【${parsedRecord.classroom}】由 ${parsedRecord.recorder} 最新填報！`, 'success');
+                  syncToPersistentCloud();
+                }
               }
             }
           } catch (e) {}
@@ -722,22 +800,19 @@
       BC_CHANNEL.onmessage = (event) => {
         if (event.data && event.data.type === 'NEW_RECORD') {
           const rec = event.data.data;
-          if (!records.some(r => r.id === rec.id)) {
-            records.unshift(rec);
-            saveLocalRecords();
-            updateAdminDashboard();
-            showToast(`🔔 收到【${rec.classroom}】填報資料！`, 'info');
+          if (mergeIncomingRecords([rec])) {
+            showToast(`🔔 收到【${rec.classroom}】最新填報！`, 'info');
           }
         }
       };
     }
 
     async function manualSync() {
-      setSyncStatus('正在同步雲端...', true);
+      setSyncStatus('正在全面檢索雲端與合併...', true);
       await fetchCloudHistory();
       updateAdminDashboard();
-      setSyncStatus('手機/電腦已連動同步', true);
-      showToast('已更新並完成手機/電腦雲端同步！', 'info');
+      setSyncStatus('手機/電腦資料已完整同步', true);
+      showToast(`已成功同步！目前共有 ${records.length} 筆完整紀錄。`, 'success');
     }
 
     function setSyncStatus(text, ok = true) {
@@ -745,7 +820,7 @@
       if (statusText) statusText.textContent = text;
     }
 
-    // 初始化示範資料
+    // 初始化範例資料
     function initDefaultRecords() {
       const today = new Date().toISOString().split('T')[0];
       const yest = new Date();
@@ -790,8 +865,9 @@
       saveLocalRecords();
     }
 
+    // 渲染三個區塊
     function renderChecklistCards() {
-      // 1. 教室內 9 項
+      // 1. 教室內 10 項
       const classroomBox = document.getElementById('classroom-items-container');
       classroomBox.innerHTML = '';
       CLASSROOM_ITEMS.forEach(item => {
@@ -806,7 +882,7 @@
         classroomBox.appendChild(card);
       });
 
-      // 2. 公共區域 3 項
+      // 2. 公共區域 2 項
       const publicBox = document.getElementById('public-items-container');
       publicBox.innerHTML = '';
       PUBLIC_ITEMS.forEach(item => {
@@ -821,7 +897,7 @@
         publicBox.appendChild(card);
       });
 
-      // 3. 廚房 3 項（獨立）
+      // 3. 廚房 3 項
       const kitchenBox = document.getElementById('kitchen-items-container');
       kitchenBox.innerHTML = '';
       KITCHEN_ITEMS.forEach(item => {
@@ -837,7 +913,6 @@
       });
     }
 
-    // 班級單選按鈕切換
     function selectClassArea(areaName) {
       document.getElementById('form-class').value = areaName;
       const buttons = document.querySelectorAll('.class-btn');
@@ -884,7 +959,6 @@
     }
 
     function updateAllBadges() {
-      // 教室
       const cBoxes = document.querySelectorAll('input[name="chk_classroom"]');
       const cChecked = Array.from(cBoxes).filter(c => c.checked).length;
       const cBtnText = document.getElementById('toggle-classroom-text');
@@ -894,7 +968,6 @@
         cBtnText.textContent = `教室內 一鍵全選 (${cBoxes.length}項)`;
       }
 
-      // 公共區
       const pBoxes = document.querySelectorAll('input[name="chk_public"]');
       const pChecked = Array.from(pBoxes).filter(p => p.checked).length;
       const pBtnText = document.getElementById('toggle-public-text');
@@ -904,7 +977,6 @@
         pBtnText.textContent = `公共區 一鍵全選 (${pBoxes.length}項)`;
       }
 
-      // 廚房
       const kBoxes = document.querySelectorAll('input[name="chk_kitchen"]');
       const kChecked = Array.from(kBoxes).filter(k => k.checked).length;
       const kBtnText = document.getElementById('toggle-kitchen-text');
@@ -914,7 +986,6 @@
         kBtnText.textContent = `廚房 一鍵全選 (${kBoxes.length}項)`;
       }
 
-      // 總進度
       const totalChecked = cChecked + pChecked + kChecked;
       const totalItems = cBoxes.length + pBoxes.length + kBoxes.length;
       const badge = document.getElementById('checked-progress-badge');
@@ -953,7 +1024,7 @@
 
       const isMobile = window.innerWidth <= 768;
       const newRecord = {
-        id: 'rec_' + Date.now(),
+        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         date: date,
         classroom: classroom,
         recorder: recorder,
@@ -964,10 +1035,12 @@
         timestamp: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
       };
 
+      // 儲存至本機
       records.unshift(newRecord);
       saveLocalRecords();
 
-      await broadcastToCloud(newRecord);
+      // 同步至雲端
+      broadcastToCloud(newRecord);
       showToast(`【${classroom}】檢核紀錄已送出！手機與電腦端已同步連動。`, 'success');
 
       resetTeacherForm(false);
@@ -984,18 +1057,31 @@
       updateAllBadges();
     }
 
+    // 關鍵修復：行政篩選器按鈕樣式與切換
     function setFilterQuickDate(type) {
       const dateInput = document.getElementById('admin-filter-date');
       const today = new Date();
 
+      // 更新按鈕樣式
+      const btnAll = document.getElementById('btn-filter-all');
+      const btnToday = document.getElementById('btn-filter-today');
+      const btnYest = document.getElementById('btn-filter-yesterday');
+
+      [btnAll, btnToday, btnYest].forEach(b => {
+        b.className = "px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition";
+      });
+
       if (type === 'today') {
         dateInput.value = today.toISOString().split('T')[0];
+        btnToday.className = "px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs";
       } else if (type === 'yesterday') {
         const yest = new Date();
         yest.setDate(yest.getDate() - 1);
         dateInput.value = yest.toISOString().split('T')[0];
+        btnYest.className = "px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs";
       } else if (type === 'all') {
         dateInput.value = '';
+        btnAll.className = "px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg transition shadow-xs";
       }
       applyAdminFilter();
     }
@@ -1004,6 +1090,7 @@
       updateAdminDashboard();
     }
 
+    // 行政儀表板計算與渲染
     function updateAdminDashboard() {
       const filterDate = document.getElementById('admin-filter-date').value;
       const filterClass = document.getElementById('admin-filter-class').value;
@@ -1017,6 +1104,7 @@
       const totalRecords = records.length;
       const targetDate = filterDate || new Date().toISOString().split('T')[0];
 
+      // 指定日期之班級覆蓋率
       const completedClassesOnDate = new Set(
         records.filter(r => r.date === targetDate).map(r => r.classroom)
       );
@@ -1030,12 +1118,16 @@
       document.getElementById('stat-warning-notes').textContent = warningCount;
 
       const filterLabel = document.getElementById('filter-label');
+      const filterTip = document.getElementById('filtered-badge-tip');
+
       if (filterDate) {
         filterLabel.textContent = `${filterDate} 單日`;
+        filterTip.classList.remove('hidden');
       } else {
-        filterLabel.textContent = `全部日期 (${records.length} 筆)`;
+        filterLabel.textContent = `全部日期 (共 ${records.length} 筆)`;
+        filterTip.classList.add('hidden');
       }
-      document.getElementById('filtered-count-display').textContent = `共 ${filtered.length} 筆符合紀錄`;
+      document.getElementById('filtered-count-display').textContent = `符合顯示：${filtered.length} 筆 / 全園總存檔：${totalRecords} 筆`;
 
       renderRecordsTable(filtered);
     }
@@ -1166,10 +1258,12 @@
     function deleteRecord(id) {
       records = records.filter(r => r.id !== id);
       saveLocalRecords();
+      syncToPersistentCloud();
       showToast('紀錄已從系統刪除', 'info');
       updateAdminDashboard();
     }
 
+    // 匯出 Excel
     function exportToExcel() {
       if (records.length === 0) {
         showToast('目前尚無檢核紀錄可供匯出！', 'warning');
@@ -1244,6 +1338,49 @@
       link.click();
       document.body.removeChild(link);
       showToast('已成功匯出 EXCEL 報表！', 'success');
+    }
+
+    // 資料管理選單開關
+    function toggleDataMenu() {
+      const menu = document.getElementById('data-management-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    // 備份本機全部紀錄 JSON
+    function backupAllRecordsJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = `田心附幼清消紀錄備份_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toggleDataMenu();
+      showToast('已成功下載紀錄備份檔案！', 'success');
+    }
+
+    // 匯入合併 JSON (徹底解決兩台電腦不同步時的手動合併)
+    function importMergeRecordsJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            const added = mergeIncomingRecords(imported);
+            syncToPersistentCloud();
+            toggleDataMenu();
+            showToast(`匯入成功！目前全園累計 ${records.length} 筆紀錄。`, 'success');
+          } else {
+            showToast('檔案格式不相符！', 'warning');
+          }
+        } catch (err) {
+          showToast('無法讀取該備份檔案！', 'warning');
+        }
+      };
+      reader.readAsText(file);
     }
 
     let qrInstance = null;
@@ -1342,11 +1479,16 @@
       }
     }
 
+    // 關鍵修復：初始化時，教師端給今天，行政端預設為空白（顯示全部！）
     function initDateTime() {
       const now = new Date();
       const todayStr = now.toISOString().split('T')[0];
+      
+      // 教師填報表單預設為今天
       document.getElementById('form-date').value = todayStr;
-      document.getElementById('admin-filter-date').value = todayStr;
+      
+      // 行政端預設空白（顯示全部紀錄，解除過濾隱藏！）
+      document.getElementById('admin-filter-date').value = '';
 
       const timeDisplay = document.getElementById('current-time-display');
       const updateClock = () => {
@@ -1397,7 +1539,7 @@
       generateHighContrastQR();
       startCloudListener();
       fetchCloudHistory();
-      setInterval(fetchCloudHistory, 20000);
+      setInterval(fetchCloudHistory, 15000); // 每 15 秒背景靜默同步一次
       lucide.createIcons();
     };
   </script>
